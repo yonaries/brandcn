@@ -9,37 +9,14 @@ export const logoNameSchema = z
   .min(1, 'Logo name cannot be empty')
   .regex(/^[a-zA-Z0-9_-]+$/, 'Logo name must contain only alphanumeric characters, hyphens, or underscores')
 
-/**
- * Schema for validating an array of logo names
- */
-export const logoNamesSchema = z.array(logoNameSchema).min(1, 'At least one logo name must be provided')
 
-/**
- * Validates a single logo name
- * @param logoName - The logo name to validate
- * @returns Validation result with success/error information
- */
 export function validateLogoName(logoName: string) {
   return logoNameSchema.safeParse(logoName)
 }
 
-/**
- * Validates multiple logo names
- * @param logoNames - Array of logo names to validate
- * @returns Validation result with success/error information
- */
-export function validateLogoNames(logoNames: string[]) {
-  return logoNamesSchema.safeParse(logoNames)
-}
-
-/**
- * Validates logo names and returns detailed error information
- * @param logoNames - Array of logo names to validate
- * @returns Object with valid names and validation errors
- */
 export function validateLogoNamesWithDetails(logoNames: string[]) {
   const validNames: string[] = []
-  const errors: Array<{error: string; name: string;}> = []
+  const errors: Array<{error: string; name: string}> = []
 
   for (const name of logoNames) {
     const result = validateLogoName(name)

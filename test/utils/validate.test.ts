@@ -1,11 +1,11 @@
 import {describe, expect, it} from 'vitest'
 
-import {validateLogoName, validateLogoNames, validateLogoNamesWithDetails} from '../../src/utils/validate.js'
+import {validateLogoName, validateLogoNamesWithDetails} from '../../src/utils/validate.js'
 
 describe('validate utilities', () => {
   describe('validateLogoName', () => {
     it('should accept valid logo names', () => {
-      const validNames = ['vercel', 'next-js', 'react_native', 'Vue3', 'angular-2']
+      const validNames = ['vercel', 'github', 'react-native', 'better-auth', 'angular-2']
 
       for (const name of validNames) {
         const result = validateLogoName(name)
@@ -26,34 +26,6 @@ describe('validate utilities', () => {
           expect(result.error.issues).toBeDefined()
           expect(result.error.issues.length).toBeGreaterThan(0)
         }
-      }
-    })
-  })
-
-  describe('validateLogoNames', () => {
-    it('should accept arrays of valid logo names', () => {
-      const validArrays = [['vercel'], ['vercel', 'next-js'], ['react', 'vue', 'angular']]
-
-      for (const names of validArrays) {
-        const result = validateLogoNames(names)
-        expect(result.success).toBe(true)
-        if (result.success) {
-          expect(result.data).toEqual(names)
-        }
-      }
-    })
-
-    it('should reject empty arrays', () => {
-      const result = validateLogoNames([])
-      expect(result.success).toBe(false)
-    })
-
-    it('should reject arrays with invalid names', () => {
-      const invalidArrays = [['vercel', 'invalid@name'], ['valid-name', ''], ['logo.name']]
-
-      for (const names of invalidArrays) {
-        const result = validateLogoNames(names)
-        expect(result.success).toBe(false)
       }
     })
   })

@@ -21,22 +21,6 @@ export class LogoSpinner {
   }
 
   /**
-   * Marks the spinner as info and stops it
-   * @param text - Info message
-   */
-  info(text?: string): void {
-    this.spinner.info(text)
-  }
-
-  /**
-   * Updates the spinner text
-   * @param text - New text to display
-   */
-  setText(text: string): void {
-    this.spinner.text = text
-  }
-
-  /**
    * Starts the spinner
    */
   start(): void {
@@ -52,22 +36,6 @@ export class LogoSpinner {
     if (text) {
       console.log(text)
     }
-  }
-
-  /**
-   * Marks the spinner as successful and stops it
-   * @param text - Success message
-   */
-  succeed(text?: string): void {
-    this.spinner.succeed(text)
-  }
-
-  /**
-   * Marks the spinner as warning and stops it
-   * @param text - Warning message
-   */
-  warn(text?: string): void {
-    this.spinner.warn(text)
   }
 }
 
@@ -114,14 +82,6 @@ export function displayError(message: string): void {
 }
 
 /**
- * Displays a warning message with consistent formatting
- * @param message - Warning message to display
- */
-export function displayWarning(message: string): void {
-  console.warn(`⚠️  Warning: ${message}`)
-}
-
-/**
  * Displays an info message with consistent formatting
  * @param message - Info message to display
  */
@@ -140,7 +100,7 @@ export function displayUsage(): void {
   console.log('📝 Examples:')
   console.log('  brandcn add vercel')
   console.log('  brandcn add vercel neon react')
-  console.log('  bunx brandcn@latest add nextjs tailwindcss')
+  console.log('  pnpm dlx brandcn@latest add nextjs tailwindcss')
   console.log('')
   console.log('🔍 Logo names must contain only alphanumeric characters, hyphens, or underscores.')
 }
