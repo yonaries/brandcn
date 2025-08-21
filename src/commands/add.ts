@@ -3,7 +3,7 @@ import {Command, Flags} from '@oclif/core'
 
 import {LogoOperationResult, processLogos, setCustomTargetDirectory, targetDirectoryExists} from '../utils/fs.js'
 import {displayError, displayUsage, LogoSpinner} from '../utils/log.js'
-import {validateLogoNamesWithDetails} from '../utils/validate.js'
+import {validateLogoNames} from '../utils/validate.js'
 
 export default class Add extends Command {
   static override args = {}
@@ -43,7 +43,7 @@ export default class Add extends Command {
     }
 
     // Validate logo names using Zod
-    const validation = validateLogoNamesWithDetails(logoNames)
+    const validation = validateLogoNames(logoNames)
 
     // Display validation errors if any
     if (validation.hasErrors) {

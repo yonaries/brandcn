@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 
 import Add from '../../src/commands/add.js'
-import {validateLogoNamesWithDetails} from '../../src/utils/validate.js'
+import {validateLogoNames} from '../../src/utils/validate.js'
 
 describe('Add command', () => {
   describe('command validation', () => {
@@ -27,7 +27,7 @@ describe('Add command', () => {
   describe('logo name validation integration', () => {
     it('should validate logo names correctly', () => {
       const validNames = ['vercel', 'neon', 'figma']
-      const result = validateLogoNamesWithDetails(validNames)
+      const result = validateLogoNames(validNames)
 
       expect(result.validNames).toEqual(validNames)
       expect(result.errors).toHaveLength(0)
@@ -36,7 +36,7 @@ describe('Add command', () => {
 
     it('should handle mixed valid and invalid names', () => {
       const mixedNames = ['vercel', 'invalid@name', 'neon']
-      const result = validateLogoNamesWithDetails(mixedNames)
+      const result = validateLogoNames(mixedNames)
 
       expect(result.validNames).toEqual(['vercel', 'neon'])
       expect(result.errors).toHaveLength(1)

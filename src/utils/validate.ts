@@ -9,17 +9,16 @@ export const logoNameSchema = z
   .min(1, 'Logo name cannot be empty')
   .regex(/^[a-zA-Z0-9_-]+$/, 'Logo name must contain only alphanumeric characters, hyphens, or underscores')
 
-
-export function validateLogoName(logoName: string) {
+export function parseLogoName(logoName: string) {
   return logoNameSchema.safeParse(logoName)
 }
 
-export function validateLogoNamesWithDetails(logoNames: string[]) {
+export function validateLogoNames(logoNames: string[]) {
   const validNames: string[] = []
   const errors: Array<{error: string; name: string}> = []
 
   for (const name of logoNames) {
-    const result = validateLogoName(name)
+    const result = parseLogoName(name)
     if (result.success) {
       validNames.push(result.data)
     } else {

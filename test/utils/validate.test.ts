@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 
-import {validateLogoName, validateLogoNamesWithDetails} from '../../src/utils/validate'
+import {validateLogoName, validateLogoNames} from '../../src/utils/validate'
 
 describe('validate utilities', () => {
   describe('validateLogoName', () => {
@@ -30,11 +30,11 @@ describe('validate utilities', () => {
     })
   })
 
-  describe('validateLogoNamesWithDetails', () => {
+  describe('validateLogoNames', () => {
     it('should return detailed validation results', () => {
       const mixedNames = ['vercel', 'invalid@name', 'valid-name', '']
 
-      const result = validateLogoNamesWithDetails(mixedNames)
+      const result = validateLogoNames(mixedNames)
 
       expect(result.validNames).toEqual(['vercel', 'valid-name'])
       expect(result.errors).toHaveLength(2)
@@ -53,7 +53,7 @@ describe('validate utilities', () => {
     it('should handle all valid names', () => {
       const validNames = ['vercel', 'next-js', 'react']
 
-      const result = validateLogoNamesWithDetails(validNames)
+      const result = validateLogoNames(validNames)
 
       expect(result.validNames).toEqual(validNames)
       expect(result.errors).toHaveLength(0)
@@ -63,7 +63,7 @@ describe('validate utilities', () => {
     it('should handle all invalid names', () => {
       const invalidNames = ['invalid@name', 'logo.name', '']
 
-      const result = validateLogoNamesWithDetails(invalidNames)
+      const result = validateLogoNames(invalidNames)
 
       expect(result.validNames).toHaveLength(0)
       expect(result.errors).toHaveLength(3)
