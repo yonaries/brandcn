@@ -2,7 +2,6 @@
 
 // Set development environment for realistic network delay simulation
 process.env.NODE_ENV = 'development'
-process.env.BRANDCN_DEV = 'true'
 
 import {execute} from '@oclif/core'
 

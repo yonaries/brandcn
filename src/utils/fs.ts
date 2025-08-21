@@ -141,6 +141,118 @@ export async function getAvailableLogos(): Promise<string[]> {
 }
 
 /**
+ * Available variant types for logos
+ */
+export type VariantType = 'dark' | 'light' | 'wordmark'
+
+/**
+ * Options for processing logos with variant filtering
+ */
+export interface ProcessLogosOptions {
+  dark?: boolean
+  light?: boolean
+  wordmark?: boolean
+}
+
+/**
+ * Finds all logo variants for a given brand name
+ * @param brandName - The brand name to search for
+ * @param availableLogos - Array of all available logo names
+ * @returns Array of matching logo names with their variants
+ */
+export function findLogoVariants(brandName: string, availableLogos: string[]): string[] {
+  const matches: string[] = []
+
+  // Normalize brand name for comparison (lowercase, no special chars except hyphens and underscores)
+  const normalizedBrand = brandName.toLowerCase()
+
+  for (const logo of availableLogos) {
+    const logoLower = logo.toLowerCase()
+
+    // Direct match
+    if (logoLower === normalizedBrand) {
+      matches.push(logo)
+      continue
+    }
+
+    // Check if logo starts with brand name followed by underscore (brand_variant)
+    if (logoLower.startsWith(normalizedBrand + '_')) {
+      matches.push(logo)
+      continue
+    }
+
+    // Check if logo starts with brand name followed by hyphen then underscore (brand-name_variant)
+    const brandWithHyphen = normalizedBrand + '-'
+    if (logoLower.startsWith(brandWithHyphen)) {
+      const remainingPart = logoLower.slice(brandWithHyphen.length)
+      // Check if remaining part contains underscore (indicating variant)
+      if (remainingPart.includes('_')) {
+        matches.push(logo)
+      }
+    }
+  }
+
+  return matches
+}
+
+/**
+ * Filters logo variants based on specified variant flags
+ * @param logoNames - Array of logo names to filter
+ * @param options - Variant filtering options
+ * @returns Filtered array of logo names
+ */
+export function filterByVariants(logoNames: string[], options: ProcessLogosOptions): string[] {
+  if (!options.dark && !options.light && !options.wordmark) {
+    // No variant filters specified, return all logos
+    return logoNames
+  }
+
+  const filtered: string[] = []
+
+  for (const logoName of logoNames) {
+    const lowerName = logoName.toLowerCase()
+
+    // Check if logo matches any of the requested variants
+    let matched = false
+
+    if (options.dark && lowerName.includes('_dark')) {
+      filtered.push(logoName)
+      matched = true
+    }
+
+    if (options.light && lowerName.includes('_light')) {
+      filtered.push(logoName)
+      matched = true
+    }
+
+    if (options.wordmark && lowerName.includes('_wordmark')) {
+      filtered.push(logoName)
+      matched = true
+    }
+
+    // Only include base logo if no specific variants were found AND no variant suffixes exist
+    if (!matched && !lowerName.includes('_dark') && !lowerName.includes('_light') && !lowerName.includes('_wordmark')) {
+      // Check if there are any variants available for this brand
+      const hasVariants = logoNames.some((otherLogo) => {
+        const otherLower = otherLogo.toLowerCase()
+        return (
+          otherLower !== lowerName &&
+          (otherLower.startsWith(lowerName + '_') ||
+            (lowerName.includes('-') && otherLower.startsWith(lowerName.split('_')[0] + '_')))
+        )
+      })
+
+      // Only include base logo if no variants available or if it's the fallback
+      if (!hasVariants) {
+        filtered.push(logoName)
+      }
+    }
+  }
+
+  return filtered
+}
+
+/**
  * Gets information about a logo operation result
  */
 export interface LogoOperationResult {
@@ -156,43 +268,71 @@ export interface LogoOperationResult {
  * @param logoNames - Array of logo names to process
  * @returns Array of operation results
  */
-export async function processLogos(logoNames: string[]): Promise<LogoOperationResult[]> {
+export async function processLogos(
+  logoNames: string[],
+  options: ProcessLogosOptions = {},
+): Promise<LogoOperationResult[]> {
   const results: LogoOperationResult[] = []
+
+  // Get all available logos for brand matching
+  const availableLogos = await getAvailableLogos()
 
   for (const logoName of logoNames) {
     try {
-      // Check if logo exists in library
-      // eslint-disable-next-line no-await-in-loop
-      const existsInLibrary = await logoExistsInLibrary(logoName)
-      if (!existsInLibrary) {
+      // Find all variants for this brand name
+      const logoVariants = findLogoVariants(logoName, availableLogos)
+
+      if (logoVariants.length === 0) {
+        // No variants found, try direct match
+        // eslint-disable-next-line no-await-in-loop
+        const existsInLibrary = await logoExistsInLibrary(logoName)
+        if (!existsInLibrary) {
+          results.push({
+            error: `Logo "${logoName}" not found in library`,
+            logoName,
+            success: false,
+          })
+          continue
+        }
+
+        logoVariants.push(logoName)
+      }
+
+      // Filter variants based on options
+      const filteredVariants = filterByVariants(logoVariants, options)
+
+      if (filteredVariants.length === 0) {
         results.push({
-          error: `Logo "${logoName}" not found in library`,
+          error: `No variants found for "${logoName}" matching the specified flags`,
           logoName,
           success: false,
         })
         continue
       }
 
-      // Check if logo already exists in target
-      // eslint-disable-next-line no-await-in-loop
-      const existsInTarget = await logoExistsInTarget(logoName)
-      if (existsInTarget) {
+      // Process each filtered variant
+      for (const variant of filteredVariants) {
+        // Check if logo already exists in target
+        // eslint-disable-next-line no-await-in-loop
+        const existsInTarget = await logoExistsInTarget(variant)
+        if (existsInTarget) {
+          results.push({
+            logoName: variant,
+            reason: 'Logo already exists in logos directory',
+            skipped: true,
+            success: true,
+          })
+          continue
+        }
+
+        // Copy the logo
+        // eslint-disable-next-line no-await-in-loop
+        await copyLogoToTarget(variant)
         results.push({
-          logoName,
-          reason: 'Logo already exists in logos directory',
-          skipped: true,
+          logoName: variant,
           success: true,
         })
-        continue
       }
-
-      // Copy the logo
-      // eslint-disable-next-line no-await-in-loop
-      await copyLogoToTarget(logoName)
-      results.push({
-        logoName,
-        success: true,
-      })
     } catch (error) {
       results.push({
         error: error instanceof Error ? error.message : 'Unknown error occurred',
