@@ -1,0 +1,79 @@
+{
+  "name": "brandcn",
+  "description": "brandcn is a CLI tool that lets you quickly pull and add high-quality brand logos to your project — just like adding components with shadcn/ui.",
+  "version": "0.0.0",
+  "author": "yonaries",
+  "bin": {
+    "brandcn": "./bin/run.js"
+  },
+  "bugs": "https://github.com/yonaries/brandcn/issues",
+  "dependencies": {
+    "@oclif/core": "^4",
+    "@oclif/plugin-help": "^6",
+    "@oclif/plugin-plugins": "^5",
+    "fs-extra": "^11.3.1",
+    "ora": "^8.1.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@eslint/compat": "^1",
+    "@oclif/prettier-config": "^0.2.1",
+    "@oclif/test": "^4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^18",
+    "eslint": "^9",
+    "eslint-config-oclif": "^6",
+    "eslint-config-prettier": "^10",
+    "oclif": "^4",
+    "shx": "^0.3.3",
+    "ts-node": "^10",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "./bin",
+    "./dist",
+    "./oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/yonaries/brandcn",
+  "keywords": [
+    "brandcn",
+    "brand",
+    "logo",
+    "logos",
+    "branding",
+    "brand-logos",
+    "brand-logos-cli",
+    "brand-logos-cli-tool"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "oclif": {
+    "bin": "brandcn",
+    "dirname": "brandcn",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " "
+  },
+  "repository": "yonaries/brandcn",
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "clean": "shx rm -rf dist && shx rm -rf node_modules && rm -rf components",
+    "dev": "NODE_ENV=development BRANDCN_DEV=true ./bin/dev.js",
+    "lint": "eslint",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "pnpm run lint",
+    "prepack": "oclif manifest && oclif readme",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "version": "oclif readme && git add README.md"
+  },
+  "types": "dist/index.d.ts"
+}

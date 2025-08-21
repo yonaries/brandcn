@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/commands/add.ts","./src/utils/fs.ts","./src/utils/log.ts","./src/utils/validate.ts"],"version":"5.9.2"}
