@@ -1,7 +1,8 @@
+import * as p from '@clack/prompts'
 import {Command, Flags} from '@oclif/core'
 
-import {processLogos} from '../utils/fs.js'
-import {displayError, displayInfo, displayResults, displaySummary, displayUsage, LogoSpinner} from '../utils/log.js'
+import {LogoOperationResult, processLogos, setCustomTargetDirectory, targetDirectoryExists} from '../utils/fs.js'
+import {displayError, displayUsage, LogoSpinner} from '../utils/log.js'
 import {validateLogoNamesWithDetails} from '../utils/validate.js'
 
 export default class Add extends Command {
@@ -63,6 +64,26 @@ export default class Add extends Command {
       this.exit(1)
     }
 
+    // Check if target directory exists and prompt for custom directory if needed
+    const directoryExists = await targetDirectoryExists()
+    if (!directoryExists) {
+      p.intro('🎨 brandcn')
+
+      const directory = await p.text({
+        message: 'Would you like to specify a custom directory?',
+        placeholder: 'components/logos',
+      })
+
+      if (p.isCancel(directory)) {
+        p.cancel('Operation cancelled.')
+        this.exit(0)
+      }
+
+      if (directory !== 'components/logos') {
+        setCustomTargetDirectory(directory)
+      }
+    }
+
     // Start processing with spinner
     const spinner = new LogoSpinner(`Processing ${validation.validNames.length} logo(s)...`)
     spinner.start()
@@ -74,30 +95,73 @@ export default class Add extends Command {
       // Stop spinner
       spinner.stop()
 
-      // Display results
-      console.log('') // Add some spacing
-      displayResults(results)
-
-      // Display summary
-      displaySummary(results)
+      // Display results using clack's beautiful UI
+      this.displayResultsWithClack(results)
 
       // Determine exit code based on results
       const hasFailures = results.some((r) => !r.success)
       const hasSuccesses = results.some((r) => r.success)
+      const successfulCount = results.filter((r) => r.success && !r.skipped).length
+      const skippedCount = results.filter((r) => r.success && r.skipped).length
 
       if (hasFailures && !hasSuccesses) {
         // All operations failed
+        p.outro('❌ All operations failed. Please check the errors above.')
         this.exit(1)
       } else if (hasFailures && hasSuccesses) {
         // Some operations failed, but some succeeded
-        displayInfo('Some operations completed with warnings or errors.')
+        p.outro(
+          `⚠️  Completed with warnings. ${successfulCount} logos added${
+            skippedCount > 0 ? `, ${skippedCount} skipped` : ''
+          }.`,
+        )
       } else {
-        // All operations succeeded - normal completion, no explicit exit needed
+        // All operations succeeded
+        const message =
+          successfulCount > 0
+            ? `🎉 Successfully added ${successfulCount} logo${successfulCount === 1 ? '' : 's'}${
+                skippedCount > 0 ? ` (${skippedCount} already existed)` : ''
+              }!`
+            : `✨ All logos were already present in your project.`
+        p.outro(message)
       }
     } catch (error) {
       spinner.fail('Operation failed')
-      displayError(error instanceof Error ? error.message : 'An unexpected error occurred')
+      p.outro(`❌ ${error instanceof Error ? error.message : 'An unexpected error occurred'}`)
       this.exit(1)
+    }
+  }
+
+  private displayResultsWithClack(results: LogoOperationResult[]): void {
+    console.log('') // Add spacing
+
+    // Group results for better display
+    const successful = results.filter((r) => r.success && !r.skipped)
+    const skipped = results.filter((r) => r.success && r.skipped)
+    const failed = results.filter((r) => !r.success)
+
+    // Display successful additions
+    if (successful.length > 0) {
+      p.log.success('Added logos:')
+      for (const result of successful) {
+        p.log.step(`✨ ${result.logoName}.svg`)
+      }
+    }
+
+    // Display skipped files
+    if (skipped.length > 0) {
+      p.log.info('Skipped (already exist):')
+      for (const result of skipped) {
+        p.log.step(`⏭️  ${result.logoName}.svg`)
+      }
+    }
+
+    // Display failed operations
+    if (failed.length > 0) {
+      p.log.error('Failed:')
+      for (const result of failed) {
+        p.log.step(`❌ ${result.logoName}: ${result.error}`)
+      }
     }
   }
 }

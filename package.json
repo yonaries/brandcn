@@ -8,6 +8,7 @@
   },
   "bugs": "https://github.com/yonaries/brandcn/issues",
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",

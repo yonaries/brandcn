@@ -4,13 +4,33 @@ import {constants} from 'node:fs'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 
+// Global variable to store custom target directory
+let customTargetDirectory: null | string = null
+
 export function getLibraryPath(): string {
   const currentDir = path.dirname(fileURLToPath(import.meta.url))
   return path.resolve(currentDir, '../../library')
 }
 
 export function getTargetLogosPath(): string {
+  if (customTargetDirectory) {
+    return path.resolve(process.cwd(), customTargetDirectory)
+  }
+
   return path.resolve(process.cwd(), 'components/logos')
+}
+
+export function setCustomTargetDirectory(directory: string): void {
+  customTargetDirectory = directory
+}
+
+export async function targetDirectoryExists(): Promise<boolean> {
+  try {
+    await access(getTargetLogosPath(), constants.F_OK)
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function logoExists(logoName: string, basePath: string): Promise<boolean> {

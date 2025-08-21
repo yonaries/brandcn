@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 
-import {validateLogoName, validateLogoNamesWithDetails} from '../../src/utils/validate.js'
+import {validateLogoName, validateLogoNamesWithDetails} from '../../src/utils/validate'
 
 describe('validate utilities', () => {
   describe('validateLogoName', () => {
