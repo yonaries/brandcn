@@ -1,14 +1,14 @@
 import {describe, expect, it} from 'vitest'
 
-import {validateLogoName, validateLogoNames} from '../../src/utils/validate'
+import {parseLogoName, validateLogoNames} from '../../src/utils/validate'
 
 describe('validate utilities', () => {
-  describe('validateLogoName', () => {
+  describe('validateLogoNames', () => {
     it('should accept valid logo names', () => {
       const validNames = ['vercel', 'github', 'react-native', 'better-auth', 'angular-2']
 
       for (const name of validNames) {
-        const result = validateLogoName(name)
+        const result = parseLogoName(name)
         expect(result.success).toBe(true)
         if (result.success) {
           expect(result.data).toBe(name)
@@ -20,7 +20,7 @@ describe('validate utilities', () => {
       const invalidNames = ['', 'logo@name', 'logo.name', 'logo name', 'logo+name', 'logo#name']
 
       for (const name of invalidNames) {
-        const result = validateLogoName(name)
+        const result = parseLogoName(name)
         expect(result.success).toBe(false)
         if (!result.success) {
           expect(result.error.issues).toBeDefined()
