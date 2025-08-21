@@ -1,7 +1,7 @@
 {
   "name": "brandcn",
   "description": "brandcn is a CLI tool that lets you quickly pull and add high-quality brand logos to your project — just like adding components with shadcn/ui.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "yonaries",
   "bin": {
     "brandcn": "./bin/run.js"
