@@ -1,0 +1,115 @@
+{
+  "commands": {
+    "add": {
+      "aliases": [],
+      "args": {},
+      "description": "Add brand logos to your project",
+      "examples": [
+        "$ brandcn add vercel",
+        "$ brandcn add vercel neon react",
+        "$ brandcn add vercel --dark --light",
+        "$ brandcn add github --wordmark",
+        "$ bunx brandcn@latest add nextjs tailwindcss"
+      ],
+      "flags": {
+        "dark": {
+          "char": "d",
+          "description": "Add only dark variant of the logo",
+          "name": "dark",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "light": {
+          "char": "l",
+          "description": "Add only light variant of the logo",
+          "name": "light",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "wordmark": {
+          "char": "w",
+          "description": "Add only wordmark variant of the logo",
+          "name": "wordmark",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "add",
+      "pluginAlias": "brandcn",
+      "pluginName": "brandcn",
+      "pluginType": "core",
+      "strict": false,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "add.js"
+      ]
+    },
+    "list": {
+      "aliases": [],
+      "args": {},
+      "description": "List all available brand logos",
+      "examples": [
+        "$ brandcn list",
+        "$ brandcn list --search react",
+        "$ brandcn list --variants"
+      ],
+      "flags": {
+        "search": {
+          "char": "s",
+          "description": "Search for logos containing the specified text",
+          "name": "search",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "variants": {
+          "char": "v",
+          "description": "Group logos by brand and show variants",
+          "name": "variants",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "list",
+      "pluginAlias": "brandcn",
+      "pluginName": "brandcn",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "list.js"
+      ]
+    },
+    "version": {
+      "aliases": [],
+      "args": {},
+      "description": "Display version information",
+      "flags": {},
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "version",
+      "pluginAlias": "brandcn",
+      "pluginName": "brandcn",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "version.js"
+      ]
+    }
+  },
+  "version": "0.1.1"
+}

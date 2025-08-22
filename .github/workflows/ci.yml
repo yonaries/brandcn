@@ -11,10 +11,8 @@ jobs:
     name: Test & Lint
     runs-on: ubuntu-latest
 
-
     strategy:
       matrix:
-        os: [ubuntu-latest]
         node-version: [18, 20, 'lts/*']
       fail-fast: false
 
@@ -39,7 +37,7 @@ jobs:
       - name: Lint code
         run: pnpm run lint
 
-      - name: Type check
+      - name: Build all packages
         run: pnpm run build
 
       - name: Run tests
