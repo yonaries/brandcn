@@ -21,7 +21,7 @@ jobs:
 
       - name: Get version
         id: version
-        run: echo "version=v$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+        run: echo "version=v$(jq -r '.version' packages/brandcn/package.json)" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
@@ -55,16 +55,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build package
-        run: pnpm run build
+      - name: Build all packages
+        run: cd packages/brandcn && pnpm run build
 
       - name: Prepare package
-        run: pnpm run prepack
+        run: cd packages/brandcn && pnpm run prepack
 
       - name: Publish to NPM
-        run: pnpm publish --no-git-checks
+        run: cd packages/brandcn && pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Cleanup
-        run: pnpm run postpack
+        run: cd packages/brandcn && pnpm run postpack
