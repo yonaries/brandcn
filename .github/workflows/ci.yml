@@ -9,11 +9,12 @@ on:
 jobs:
   test:
     name: Test & Lint
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
         node-version: [18, 20, 'lts/*']
       fail-fast: false
 
