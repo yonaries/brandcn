@@ -73,7 +73,7 @@ fi
 
 # 5. Versioning
 # Read current version
-version=$(cat version.json | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+version=$(cat package.json | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
 
 # Split version into components
 IFS='.' read -r major minor patch <<< "$version"
@@ -84,13 +84,11 @@ new_patch=$((patch + 1))
 # Create new version string
 new_version="$major.$minor.$new_patch"
 
-# Update version.json
-echo "{
-  \"version\": \"$new_version\"
-}" > version.json
+# Update version in package.json using jq
+jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
 
-# Add version.json to the commit
-git add version.json 
+# Add package.json to the commit
+git add package.json 
 
 print_success "All pre-commit checks passed! 🎉"
 echo ""

@@ -21,7 +21,7 @@ jobs:
 
       - name: Get version
         id: version
-        run: echo "version=v$(jq -r '.version' version.json)" >> $GITHUB_OUTPUT
+        run: echo "version=v$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
@@ -53,12 +53,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Sync version
-        run: |
-          VERSION=$(jq -r '.version' version.json)
-          pnpm version $VERSION --no-git-tag-version
+        run: pnpm install
 
       - name: Build package
         run: pnpm run build
