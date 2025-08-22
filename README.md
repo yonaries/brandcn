@@ -4,10 +4,14 @@ Add high-quality brand logos to your project instantly — just like adding comp
 
 [![npm version](https://img.shields.io/npm/v/brandcn.svg)](https://npmjs.org/package/brandcn)
 [![Downloads](https://img.shields.io/npm/dm/brandcn.svg)](https://npmjs.org/package/brandcn)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Quick Start
 
 ```bash
+# Discover available logos
+npx brandcn list
+
 # Use without installing
 npx brandcn add vercel nextjs react
 
@@ -15,6 +19,22 @@ pnpm dlx brandcn add vercel nextjs react
 ```
 
 ## Usage
+
+### List available logos
+
+```bash
+# List all available logos
+brandcn list
+
+# Search for specific logos
+brandcn list --search react
+
+# Show logos grouped by brand with variants
+brandcn list --variants
+
+# Combine search with variants view
+brandcn list --search react --variants
+```
 
 ### Add logos to your project
 
@@ -32,13 +52,29 @@ brandcn add stripe --wordmark
 
 ### Available flags
 
-- `--dark` - Add only dark variant
-- `--light` - Add only light variant
-- `--wordmark` - Add only wordmark variant
+#### For `brandcn list`:
+
+- `--search` / `-s` - Filter logos by name
+- `--variants` / `-v` - Group logos by brand and show variants
+
+#### For `brandcn add`:
+
+- `--dark` / `-d` - Add only dark variant
+- `--light` / `-l` - Add only light variant
+- `--wordmark` / `-w` - Add only wordmark variant
 
 ## Examples
 
 ```bash
+# Discover available logos
+brandcn list
+
+# Find React-related logos
+brandcn list --search react
+
+# See all variants for brands
+brandcn list --variants
+
 # Basic usage
 brandcn add google
 
@@ -57,13 +93,15 @@ npx brandcn@latest add react vue angular
 
 ## Available Logos
 
-The library includes 350+ high-quality SVG logos for popular brands including:
+The library includes 780+ high-quality SVG logos for popular brands including:
 
 - **Tech**: React, Vue, Angular, NextJS, TailwindCSS
 - **Companies**: Google, Apple, Microsoft, Meta, Netflix
 - **Services**: GitHub, Vercel, Netlify, AWS, Stripe
 - **Tools**: Figma, VSCode, Docker, Kubernetes
 - And many more!
+
+Use `brandcn list` to see all available logos, or `brandcn list --search <term>` to find specific brands.
 
 ## How it works
 
@@ -72,6 +110,24 @@ The library includes 350+ high-quality SVG logos for popular brands including:
 3. Each logo is saved as an optimized SVG file
 4. Existing files are automatically skipped
 
+## Contributing
+
+We welcome contributions! To get started:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Add your changes and run tests: `pnpm test`
+4. Ensure code quality: `pnpm lint`
+5. Submit a pull request
+
+**Adding new logos:**
+
+- Place SVG files in `library/` directory
+- Use lowercase names with hyphens (e.g., `brand-name.svg`)
+- For variants, use suffixes: `_dark`, `_light`, `_wordmark`
+- Optimize SVGs and ensure they're high quality
+- Create a PR with logo/brand-name
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
