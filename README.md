@@ -12,10 +12,14 @@ Add high-quality brand logos to your project instantly — just like adding comp
 # Discover available logos
 npx brandcn list
 
-# Use without installing
+#npm
 npx brandcn add vercel nextjs react
 
+#pnpm 
 pnpm dlx brandcn add vercel nextjs react
+
+#bun
+bunx brandcn add vercel nextjs react
 ```
 
 ## Usage
@@ -34,20 +38,6 @@ brandcn list --variants
 
 # Combine search with variants view
 brandcn list --search react --variants
-```
-
-### Add logos to your project
-
-```bash
-# Add single logo
-brandcn add vercel
-
-# Add multiple logos
-brandcn add vercel nextjs tailwindcss
-
-# Add specific variants
-brandcn add github --dark
-brandcn add stripe --wordmark
 ```
 
 ### Available flags
@@ -112,19 +102,11 @@ Use `brandcn list` to see all available logos, or `brandcn list --search <term>`
 
 ## Contributing
 
-We welcome contributions! To get started:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Add your changes and run tests: `pnpm test`
-4. Ensure code quality: `pnpm lint`
-5. Submit a pull request
-
 **Adding new logos:**
 
 - Place SVG files in `library/` directory
-- Use lowercase names with hyphens (e.g., `brand-name.svg`)
-- For variants, use suffixes: `_dark`, `_light`, `_wordmark`
+- Use lowercase with hyphens for brand naming (e.g., `brand-name.svg`)
+- For variants, use suffixes: `_dark`, `_light`, `_wordmark` (e.g., `brand-name_dark.svg`)
 - Optimize SVGs and ensure they're high quality
 - Create a PR with logo/brand-name
 
