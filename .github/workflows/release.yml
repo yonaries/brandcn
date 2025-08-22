@@ -12,16 +12,22 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get version
+        id: version
+        run: echo "version=v$(jq -r '.version' version.json)" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref_name }}
-          tag: ${{ github.ref_name }}
+          name: ${{ steps.version.outputs.version }}
+          tag: ${{ steps.version.outputs.version }}
           generateReleaseNotes: true
           token: ${{ secrets.GH_TOKEN }}
 
