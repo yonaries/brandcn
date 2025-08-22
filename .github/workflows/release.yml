@@ -55,6 +55,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Sync version
+        run: |
+          VERSION=$(jq -r '.version' version.json)
+          pnpm version $VERSION --no-git-tag-version
+
       - name: Build package
         run: pnpm run build
 
