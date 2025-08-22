@@ -1,5 +1,4 @@
-import pkg from 'fs-extra'
-const {access, copy, ensureDir, readdir} = pkg
+import {access, copy, ensureDir, readdir} from 'fs-extra'
 import {constants} from 'node:fs'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
