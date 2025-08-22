@@ -208,3 +208,19 @@ export async function processLogos(
 
   return results
 }
+
+export function getVariantType(logoName: string, baseName: string): null | string {
+  const lowerName = logoName.toLowerCase()
+  const lowerBase = baseName.toLowerCase()
+
+  if (lowerName.includes('_dark')) return 'dark'
+  if (lowerName.includes('_light')) return 'light'
+  if (lowerName.includes('_wordmark')) return 'wordmark'
+  if (lowerName === lowerBase) return 'default'
+
+  // Check for other variant patterns
+  if (lowerName.includes('_icon')) return 'icon'
+  if (lowerName.includes('_logo')) return 'logo'
+
+  return null
+}
