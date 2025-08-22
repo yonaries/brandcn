@@ -1,4 +1,5 @@
-import {access, copy, ensureDir, readdir} from 'fs-extra'
+import fs from 'fs-extra'
+const {access, copy, ensureDir, readdir} = fs
 import {constants} from 'node:fs'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'

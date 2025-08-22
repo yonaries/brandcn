@@ -35,17 +35,14 @@ export default class Add extends Command {
     const {argv, flags} = await this.parse(Add)
     const logoNames = argv as string[]
 
-    // Handle case where no logo names are provided
     if (!logoNames || logoNames.length === 0) {
       displayError('No logo names provided')
       displayUsage()
       this.exit(1)
     }
 
-    // Validate logo names using Zod
     const validation = validateLogoNames(logoNames)
 
-    // Display validation errors if any
     if (validation.hasErrors) {
       displayError('Invalid logo names:')
       for (const error of validation.errors) {
@@ -57,14 +54,12 @@ export default class Add extends Command {
       this.exit(1)
     }
 
-    // If no valid names after validation, exit
     if (validation.validNames.length === 0) {
       displayError('No valid logo names provided')
       displayUsage()
       this.exit(1)
     }
 
-    // Check if target directory exists and prompt for custom directory if needed
     const directoryExists = await targetDirectoryExists()
     if (!directoryExists) {
       p.intro('🎨 brandcn')
@@ -84,39 +79,31 @@ export default class Add extends Command {
       }
     }
 
-    // Start processing with spinner
     const spinner = new LogoSpinner(`Processing ${validation.validNames.length} logo(s)...`)
     spinner.start()
 
     try {
-      // Process all logos
       const results = await processLogos(validation.validNames, flags)
 
-      // Stop spinner
       spinner.stop()
 
-      // Display results using clack's beautiful UI
       this.displayResultsWithClack(results)
 
-      // Determine exit code based on results
       const hasFailures = results.some((r) => !r.success)
       const hasSuccesses = results.some((r) => r.success)
       const successfulCount = results.filter((r) => r.success && !r.skipped).length
       const skippedCount = results.filter((r) => r.success && r.skipped).length
 
       if (hasFailures && !hasSuccesses) {
-        // All operations failed
         p.outro('❌ All operations failed. Please check the errors above.')
         this.exit(1)
       } else if (hasFailures && hasSuccesses) {
-        // Some operations failed, but some succeeded
         p.outro(
           `⚠️  Completed with warnings. ${successfulCount} logos added${
             skippedCount > 0 ? `, ${skippedCount} skipped` : ''
           }.`,
         )
       } else {
-        // All operations succeeded
         const message =
           successfulCount > 0
             ? `🎉 Successfully added ${successfulCount} logo${successfulCount === 1 ? '' : 's'}${
@@ -133,14 +120,12 @@ export default class Add extends Command {
   }
 
   private displayResultsWithClack(results: LogoOperationResult[]): void {
-    console.log('') // Add spacing
+    console.log('')
 
-    // Group results for better display
     const successful = results.filter((r) => r.success && !r.skipped)
     const skipped = results.filter((r) => r.success && r.skipped)
     const failed = results.filter((r) => !r.success)
 
-    // Display successful additions
     if (successful.length > 0) {
       p.log.success('Added logos:')
       for (const result of successful) {
@@ -148,7 +133,6 @@ export default class Add extends Command {
       }
     }
 
-    // Display skipped files
     if (skipped.length > 0) {
       p.log.info('Skipped (already exist):')
       for (const result of skipped) {
@@ -156,7 +140,6 @@ export default class Add extends Command {
       }
     }
 
-    // Display failed operations
     if (failed.length > 0) {
       p.log.error('Failed:')
       for (const result of failed) {

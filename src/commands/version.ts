@@ -1,5 +1,6 @@
 import {Command} from '@oclif/core'
-import {readFileSync} from 'fs-extra'
+import fs from 'fs-extra'
+const {readFileSync} = fs
 import {dirname, join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
