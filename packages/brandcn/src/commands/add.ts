@@ -1,7 +1,9 @@
 import * as p from '@clack/prompts'
 import {Command, Flags} from '@oclif/core'
 
-import {LogoOperationResult, processLogos, setCustomTargetDirectory, targetDirectoryExists} from '../utils/fs.js'
+import type {LogoOperationResult} from '../types/logos.js'
+
+import {getDefaultDirectoryPath, processLogos, setCustomTargetDirectory, targetDirectoryExists} from '../utils/fs.js'
 import {displayError, displayUsage, LogoSpinner} from '../utils/log.js'
 import {validateLogoNames} from '../utils/validate.js'
 
@@ -64,9 +66,10 @@ export default class Add extends Command {
     if (!directoryExists) {
       p.intro('🎨 brandcn')
 
+      const defaultPath = getDefaultDirectoryPath()
       const directory = await p.text({
         message: 'Would you like to specify a custom directory?',
-        placeholder: 'components/logos',
+        placeholder: defaultPath,
       })
 
       if (p.isCancel(directory)) {
@@ -74,9 +77,11 @@ export default class Add extends Command {
         this.exit(0)
       }
 
-      if (directory !== 'components/logos') {
-        setCustomTargetDirectory(directory)
-      }
+      const chosenDir = (directory && directory.toString().trim().length > 0)
+        ? directory.toString().trim()
+        : defaultPath
+
+      setCustomTargetDirectory(chosenDir)
     }
 
     const spinner = new LogoSpinner(`Processing ${validation.validNames.length} logo(s)...`)
