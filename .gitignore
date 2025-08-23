@@ -44,4 +44,4 @@ pnpm-lock.yaml.js
 **/package-lock.json
 
 # brandcn specific
-**/components
+**/packages/brandcn/components
