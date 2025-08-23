@@ -47,9 +47,17 @@ describe('fs utilities', () => {
   })
 
   describe('getTargetLogosPath', () => {
-    it('should return path to logos directory in current working directory', () => {
+    it('should return path to logos directory in current working directory when no src folder exists', () => {
       const targetPath = getTargetLogosPath()
       expect(targetPath).toBe(path.resolve(process.cwd(), 'components/logos'))
+    })
+
+    it('should return path to logos directory in src folder when src folder exists', () => {
+      // Create an src directory
+      mkdirSync('./src', {recursive: true})
+
+      const targetPath = getTargetLogosPath()
+      expect(targetPath).toBe(path.resolve(process.cwd(), 'src/components/logos'))
     })
   })
 

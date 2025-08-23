@@ -17,6 +17,16 @@ export function getTargetLogosPath(): string {
     return path.resolve(process.cwd(), customTargetDirectory)
   }
 
+  // Check if src folder exists first
+  const srcPath = path.resolve(process.cwd(), 'src')
+  try {
+    if (fs.pathExistsSync(srcPath) && fs.statSync(srcPath).isDirectory()) {
+      return path.resolve(srcPath, 'components/logos')
+    }
+  } catch {
+    // If we can't access src folder, fall back to default
+  }
+
   return path.resolve(process.cwd(), 'components/logos')
 }
 
