@@ -39,7 +39,6 @@ pnpm-lock.yaml.js
 **/.turbo
 
 # package manager
-**/pnpm-lock.yaml
 **/yarn.lock
 **/package-lock.json
 
