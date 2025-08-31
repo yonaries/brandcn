@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import {existsSync, mkdirSync, rmSync, writeFileSync} from 'node:fs'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {afterEach, beforeEach, describe, expect, it} from 'vitest'
 
 import {
   copyLogoToTarget,
@@ -22,18 +22,18 @@ describe('fs utilities', () => {
   beforeEach(() => {
     // Clean up any existing test directory
     if (existsSync(testDir)) {
-      rmSync(testDir, { force: true, recursive: true })
+      rmSync(testDir, {force: true, recursive: true})
     }
 
     // Create fresh test directory
-    mkdirSync(testDir, { recursive: true })
+    mkdirSync(testDir, {recursive: true})
     process.chdir(testDir)
   })
 
   afterEach(() => {
     process.chdir(originalCwd)
     if (existsSync(testDir)) {
-      rmSync(testDir, { force: true, recursive: true })
+      rmSync(testDir, {force: true, recursive: true})
     }
   })
 
@@ -91,14 +91,14 @@ describe('fs utilities', () => {
     })
 
     it('should return false when logo does not exist in target', async () => {
-      mkdirSync('./components', { recursive: true })
+      mkdirSync('./components', {recursive: true})
       mkdirSync('./components/logos')
       const exists = await logoExistsInTarget('vercel')
       expect(exists).toBe(false)
     })
 
     it('should return true when logo exists in target', async () => {
-      mkdirSync('./components', { recursive: true })
+      mkdirSync('./components', {recursive: true})
       mkdirSync('./components/logos')
       writeFileSync('./components/logos/vercel.svg', '<svg></svg>')
 
@@ -117,7 +117,7 @@ describe('fs utilities', () => {
     })
 
     it('should not fail if logos directory already exists', async () => {
-      mkdirSync('./components', { recursive: true })
+      mkdirSync('./components', {recursive: true})
       mkdirSync('./components/logos')
       expect(existsSync('./components/logos')).toBe(true)
 
@@ -215,31 +215,31 @@ describe('fs utilities', () => {
 
     it('should filter only dark variants', () => {
       const logos = ['github', 'github_dark', 'github_light', 'github_wordmark']
-      const filtered = filterByVariants(logos, { dark: true })
+      const filtered = filterByVariants(logos, {dark: true})
       expect(filtered).toEqual(['github_dark'])
     })
 
     it('should filter only light variants', () => {
       const logos = ['github', 'github_dark', 'github_light', 'github_wordmark']
-      const filtered = filterByVariants(logos, { light: true })
+      const filtered = filterByVariants(logos, {light: true})
       expect(filtered).toEqual(['github_light'])
     })
 
     it('should filter only wordmark variants', () => {
       const logos = ['github', 'github_dark', 'github_light', 'github_wordmark']
-      const filtered = filterByVariants(logos, { wordmark: true })
+      const filtered = filterByVariants(logos, {wordmark: true})
       expect(filtered).toEqual(['github_wordmark'])
     })
 
     it('should filter multiple variants', () => {
       const logos = ['github', 'github_dark', 'github_light', 'github_wordmark']
-      const filtered = filterByVariants(logos, { dark: true, light: true })
+      const filtered = filterByVariants(logos, {dark: true, light: true})
       expect(filtered).toEqual(['github_dark', 'github_light'])
     })
 
     it('should include base logo when no variants match', () => {
       const logos = ['vercel', 'neon']
-      const filtered = filterByVariants(logos, { dark: true })
+      const filtered = filterByVariants(logos, {dark: true})
       expect(filtered).toEqual(['vercel', 'neon'])
     })
   })
@@ -276,28 +276,25 @@ describe('fs utilities', () => {
 
       const skippedResults = results.filter((r) => r.skipped)
       expect(skippedResults.length).toBeGreaterThan(0)
-      expect(skippedResults.every((r) => r.success && r.reason?.includes('already exists'))).toBe(
-        true,
-      )
+      expect(skippedResults.every((r) => r.success && r.reason?.includes('already exists'))).toBe(true)
     })
 
     it('should filter variants based on options', async () => {
       // Test with a brand that has dark variants
-      const results = await processLogos(['github'], { dark: true })
+      const results = await processLogos(['github'], {dark: true})
 
       expect(results.length).toBeGreaterThan(0)
       // All successful results should be dark variants or base logos
       const successfulResults = results.filter((r) => r.success && !r.skipped)
       for (const result of successfulResults) {
-        expect(
-          result.logoName.toLowerCase().includes('_dark') ||
-            !result.logoName.toLowerCase().includes('_'),
-        ).toBe(true)
+        expect(result.logoName.toLowerCase().includes('_dark') || !result.logoName.toLowerCase().includes('_')).toBe(
+          true,
+        )
       }
     })
 
     it('should handle brands with no matching variants', async () => {
-      const results = await processLogos(['vercel'], { dark: true, light: true, wordmark: true })
+      const results = await processLogos(['vercel'], {dark: true, light: true, wordmark: true})
 
       // Should either find variants or fall back to base logo
       expect(results.length).toBeGreaterThan(0)

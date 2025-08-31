@@ -1,10 +1,10 @@
 import fs from 'fs-extra'
-const { access, copy, ensureDir, readdir } = fs
-import { constants } from 'node:fs'
+const {access, copy, ensureDir, readdir} = fs
+import {constants} from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import {fileURLToPath} from 'node:url'
 
-import type {LogoOperationResult, ProcessLogosOptions} from '../types/logos.types.js'
+import type {LogoOperationResult, ProcessLogosOptions} from '../types/logos.js'
 
 // Global variable to store custom target directory
 let customTargetDirectory: null | string = null
@@ -91,7 +91,7 @@ export async function copyLogoToTarget(logoName: string): Promise<void> {
   const sourcePath = path.join(getLibraryPath(), `${logoName}.svg`)
   const destPath = path.join(getTargetLogosPath(), `${logoName}.svg`)
 
-  await copy(sourcePath, destPath, { overwrite: false })
+  await copy(sourcePath, destPath, {overwrite: false})
 }
 
 export async function getAvailableLogos(): Promise<string[]> {
@@ -102,9 +102,7 @@ export async function getAvailableLogos(): Promise<string[]> {
       .map((file) => file.replace('.svg', ''))
       .sort()
   } catch (error) {
-    throw new Error(
-      `Failed to read library directory: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+    throw new Error(`Failed to read library directory: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -116,22 +114,19 @@ export function findLogoVariants(brandName: string, availableLogos: string[]): s
 
     return (
       logoLower === normalizedBrand ||
-      logoLower.startsWith(`${normalizedBrand}_`) ||
-      (logoLower.startsWith(`${normalizedBrand}-`) &&
-        logoLower.slice(normalizedBrand.length + 1).includes('_'))
+      logoLower.startsWith(normalizedBrand + '_') ||
+      (logoLower.startsWith(normalizedBrand + '-') && logoLower.slice(normalizedBrand.length + 1).includes('_'))
     )
   })
 }
 
 export function filterByVariants(logoNames: string[], options: ProcessLogosOptions): string[] {
-  const { dark, light, wordmark } = options
+  const {dark, light, wordmark} = options
 
   if (!dark && !light && !wordmark) return logoNames
 
   const variants = ['_dark', '_light', '_wordmark']
-  const requestedVariants = [dark && '_dark', light && '_light', wordmark && '_wordmark'].filter(
-    Boolean,
-  ) as string[]
+  const requestedVariants = [dark && '_dark', light && '_light', wordmark && '_wordmark'].filter(Boolean) as string[]
 
   return logoNames.filter((logoName) => {
     const lowerName = logoName.toLowerCase()
@@ -149,14 +144,15 @@ export function filterByVariants(logoNames: string[], options: ProcessLogosOptio
       const otherLower = otherLogo.toLowerCase()
       return (
         otherLower !== lowerName &&
-        (otherLower.startsWith(`${lowerName}_`) ||
-          (lowerName.includes('-') && otherLower.startsWith(`${lowerName.split('_')[0]}_`)))
+        (otherLower.startsWith(lowerName + '_') ||
+          (lowerName.includes('-') && otherLower.startsWith(lowerName.split('_')[0] + '_')))
       )
     })
 
     return !hasVariants
   })
 }
+
 
 export async function processLogos(
   logoNames: string[],
