@@ -1,7 +1,8 @@
 import * as p from "@clack/prompts";
 import { Command, Flags } from "@oclif/core";
-import type { LogoOperationResult } from "../types/fs.js";
+import type { LogoOperationResult } from "../types/logos.js";
 import {
+  getDefaultDirectoryPath,
   processLogos,
   setCustomTargetDirectory,
   targetDirectoryExists,

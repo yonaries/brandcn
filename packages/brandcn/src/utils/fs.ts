@@ -4,8 +4,6 @@ import { constants } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { LogoOperationResult, ProcessLogosOptions } from '../types/fs.js'
-
 import type {LogoOperationResult, ProcessLogosOptions} from '../types/logos.js'
 
 // Global variable to store custom target directory
