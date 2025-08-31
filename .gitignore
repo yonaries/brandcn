@@ -4,6 +4,7 @@
 **/node_modules
 
 pnpm-lock.yaml.js
+pnpm-lock.yaml
 
 # testing
 **/coverage
@@ -44,4 +45,4 @@ pnpm-lock.yaml.js
 **/package-lock.json
 
 # brandcn specific
-**/components
+**/components/logos
