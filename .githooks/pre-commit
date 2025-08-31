@@ -35,24 +35,12 @@ if ! command -v pnpm &> /dev/null; then
     exit 1
 fi
 
-# 1. Type checking
-# if pnpm exec tsc --noEmit; then
-#     print_success "TypeScript type checking passed"
-# else
-#     print_error "TypeScript type checking failed"
-#     exit 1
-# fi
-
 # 2. Linting
-if pnpm run lint; then
-    print_success "ESLint checks passed"
+if pnpm dlx lint-staged; then
+    print_success "Lint checks passed"
 else
-    if pnpm run lint:fix; then
-        print_success "ESLint checks passed after fixing"
-    else
-        print_error "ESLint checks failed"
-        exit 1
-    fi
+    print_error "Lint checks failed"
+    exit 1
 fi
 
 # 3. Testing
@@ -72,11 +60,23 @@ else
 fi
 
 # 5. Versioning
-# Read current version
-version=$(cat packages/brandcn/package.json | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+GH_API="https://api.github.com/repos/yonaries/brandcn/releases/latest"
+print_status "Fetching current version from GitHub releases..."
+
+response=$(curl -sS -H "Accept: application/vnd.github+json" "$GH_API")
+
+tag=$(echo "$response" | jq -r '.tag_name // empty')
+
+if [[ -n "$tag" && "$tag" != "null" ]]; then
+    version_from_source="${tag#v}"
+    print_success "Latest GitHub release found: $tag"
+else
+    print_warning "Could not retrieve GitHub release. Falling back to local package.json version."
+    version_from_source=$(jq -r '.version' packages/brandcn/package.json)
+fi
 
 # Split version into components
-IFS='.' read -r major minor patch <<< "$version"
+IFS='.' read -r major minor patch <<< "$version_from_source"
 
 # Increment patch version
 new_patch=$((patch + 1))

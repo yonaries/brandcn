@@ -1,4 +1,4 @@
-name: CI
+name: ci
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20, 'lts/*']
+        node-version: [20, 'lts/*']
       fail-fast: false
 
     steps:
@@ -23,7 +23,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: "10.0.0"
+          version: '10.15.0'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,8 +34,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint code
-        run: pnpm run lint
+      - name: Lint and format code with Biome
+        run: pnpm run check
 
       - name: Build all packages
         run: pnpm run build

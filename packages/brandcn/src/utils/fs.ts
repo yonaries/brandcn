@@ -114,8 +114,8 @@ export function findLogoVariants(brandName: string, availableLogos: string[]): s
 
     return (
       logoLower === normalizedBrand ||
-      logoLower.startsWith(normalizedBrand + '_') ||
-      (logoLower.startsWith(normalizedBrand + '-') && logoLower.slice(normalizedBrand.length + 1).includes('_'))
+      logoLower.startsWith(`${normalizedBrand}_`) ||
+      (logoLower.startsWith(`${normalizedBrand}-`) && logoLower.slice(normalizedBrand.length + 1).includes('_'))
     )
   })
 }
@@ -144,8 +144,8 @@ export function filterByVariants(logoNames: string[], options: ProcessLogosOptio
       const otherLower = otherLogo.toLowerCase()
       return (
         otherLower !== lowerName &&
-        (otherLower.startsWith(lowerName + '_') ||
-          (lowerName.includes('-') && otherLower.startsWith(lowerName.split('_')[0] + '_')))
+        (otherLower.startsWith(`${lowerName}_`) ||
+          (lowerName.includes('-') && otherLower.startsWith(`${lowerName.split('_')[0]}_`)))
       )
     })
 
