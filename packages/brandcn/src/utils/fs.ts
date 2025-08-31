@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 import type { LogoOperationResult, ProcessLogosOptions } from '../types/fs.js'
 
+import type {LogoOperationResult, ProcessLogosOptions} from '../types/logos.js'
+
 // Global variable to store custom target directory
 let customTargetDirectory: null | string = null
 
@@ -19,11 +21,36 @@ export function getTargetLogosPath(): string {
     return path.resolve(process.cwd(), customTargetDirectory)
   }
 
-  return path.resolve(process.cwd(), 'components/logos')
+  // Try reading configured outputDir from package.json
+  const configured = getConfiguredOutputDir()
+  if (configured) {
+    return configured
+  }
+
+  // Check if src folder exists first
+  const defaultPath = getDefaultDirectoryPath()
+
+  return path.resolve(process.cwd(), defaultPath)
 }
 
 export function setCustomTargetDirectory(directory: string): void {
-  customTargetDirectory = directory
+  const normalized = directory?.toString().trim() || 'components/logos'
+  customTargetDirectory = normalized
+  persistConfiguredOutputDir(normalized)
+}
+
+export function getDefaultDirectoryPath(): string {
+  // Check if src folder exists first
+  const srcPath = path.resolve(process.cwd(), 'src')
+  try {
+    if (fs.pathExistsSync(srcPath) && fs.statSync(srcPath).isDirectory()) {
+      return 'src/components/logos'
+    }
+  } catch {
+    // If we can't access src folder, fall back to default
+  }
+
+  return 'components/logos'
 }
 
 export async function targetDirectoryExists(): Promise<boolean> {
@@ -214,4 +241,103 @@ export function getVariantType(logoName: string, baseName: string): null | strin
   if (lowerName.includes('_logo')) return 'logo'
 
   return null
+}
+
+// Configuration helpers
+function findNearestPackageJson(startDir: string = process.cwd()): null | string {
+  let currentDir = startDir
+  while (true) {
+    const candidate = path.join(currentDir, 'package.json')
+    if (fs.pathExistsSync(candidate)) return candidate
+    const parent = path.dirname(currentDir)
+    if (parent === currentDir) break
+    currentDir = parent
+  }
+
+  return null
+}
+
+function readBrandcnOutputDirFrom(pkgPath: string): null | string {
+  try {
+    const pkg = fs.readJSONSync(pkgPath)
+    const output = pkg?.brandcn?.outputDir
+    if (typeof output === 'string' && output.trim().length > 0) {
+      return path.resolve(path.dirname(pkgPath), output.trim())
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+function listWorkspacePackageJsonCandidates(): string[] {
+  const roots = ['apps', 'packages']
+  const results: string[] = []
+  for (const root of roots) {
+    const rootPath = path.resolve(process.cwd(), root)
+    if (!fs.pathExistsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) continue
+    const entries = fs.readdirSync(rootPath)
+    for (const entry of entries) {
+      const pkgJson = path.join(rootPath, entry, 'package.json')
+      if (fs.pathExistsSync(pkgJson)) results.push(pkgJson)
+    }
+  }
+  
+  return results
+}
+
+function getConfiguredOutputDir(): null | string {
+  try {
+    const nearest = findNearestPackageJson()
+    const absFromNearest = nearest ? readBrandcnOutputDirFrom(nearest) : null
+    if (absFromNearest) return absFromNearest
+
+    const workspacePkgs = listWorkspacePackageJsonCandidates()
+    const absCandidates = workspacePkgs
+      .map((pkgPath) => readBrandcnOutputDirFrom(pkgPath))
+      .filter(Boolean) as string[]
+    if (absCandidates.length === 1) return absCandidates[0]
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+interface PackageJsonLike {
+  [key: string]: unknown
+  brandcn?: {
+    [key: string]: unknown
+    outputDir?: string
+  }
+}
+
+function persistConfiguredOutputDir(directory: string): void {
+  try {
+    const normalized = directory?.toString().trim() || 'components/logos'
+    const absTarget = path.resolve(process.cwd(), normalized)
+    const nearestFromTarget = findNearestPackageJson(path.dirname(absTarget))
+    const nearestFromCwd = findNearestPackageJson()
+    const pkgPath = nearestFromTarget || nearestFromCwd
+    if (!pkgPath) return
+    let pkg: PackageJsonLike = {}
+    try {
+      pkg = fs.readJSONSync(pkgPath)
+    } catch {
+      pkg = {}
+    }
+
+    const nextPkg = {
+      ...pkg,
+      brandcn: {
+        ...pkg.brandcn,
+        outputDir: normalized,
+      },
+    }
+
+    fs.writeJSONSync(pkgPath, nextPkg, {spaces: 2})
+  } catch {
+    // Ignore persistence errors; CLI can still operate with in-memory value
+  }
 }

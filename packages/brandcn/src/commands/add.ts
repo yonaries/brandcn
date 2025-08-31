@@ -68,6 +68,7 @@ export default class Add extends Command {
     if (!directoryExists) {
       p.intro("🎨 brandcn");
 
+      const defaultPath = getDefaultDirectoryPath()
       const directory = await p.text({
         message: "Would you like to specify a custom directory?",
         placeholder: "components/logos",

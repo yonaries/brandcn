@@ -37,5 +37,4 @@ oclif.manifest.json
 **/yarn.lock
 **/package-lock.json
 
-# brandcn specific
 **/components/logos
