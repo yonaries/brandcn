@@ -3,21 +3,26 @@
   "version": "0.1.9",
   "private": true,
   "description": "brandcn monorepo containing the CLI package and website",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
     "test": "turbo test",
     "clean": "turbo clean",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "biome:ci": "biome ci ."
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
-    "turbo": "^2.5.6"
+    "@biomejs/biome": "^1.9.4",
+    "@workspace/typescript-config": "workspace:*",
+    "lint-staged": "^16.1.5",
+    "turbo": "^2.5.6",
+    "typescript": "^5.8.2"
   },
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=10.0.0"
+    "pnpm": ">=10.15.0"
   }
 }

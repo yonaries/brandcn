@@ -74,7 +74,7 @@ export default class List extends Command {
         groups.set(baseName, [])
       }
 
-      groups.get(baseName)!.push(logo)
+      groups.get(baseName)?.push(logo)
     }
 
     // Sort groups by base name

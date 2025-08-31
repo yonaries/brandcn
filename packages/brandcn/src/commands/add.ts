@@ -4,7 +4,7 @@ import {Command, Flags} from '@oclif/core'
 import type {LogoOperationResult} from '../types/logos.js'
 
 import {getDefaultDirectoryPath, processLogos, setCustomTargetDirectory, targetDirectoryExists} from '../utils/fs.js'
-import {displayError, displayUsage, LogoSpinner} from '../utils/log.js'
+import {LogoSpinner, displayError, displayUsage } from '../utils/log.js'
 import {validateLogoNames} from '../utils/validate.js'
 
 export default class Add extends Command {
@@ -114,7 +114,7 @@ export default class Add extends Command {
             ? `🎉 Successfully added ${successfulCount} logo${successfulCount === 1 ? '' : 's'}${
                 skippedCount > 0 ? ` (${skippedCount} already existed)` : ''
               }!`
-            : `✨ All logos were already present in your project.`
+            : '✨ All logos were already present in your project.'
         p.outro(message)
       }
     } catch (error) {

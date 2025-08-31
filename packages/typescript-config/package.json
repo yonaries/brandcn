@@ -1,0 +1,15 @@
+{
+  "name": "@workspace/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    "./nextjs.json": "./nextjs.json",
+    "./base.json": "./base.json",
+    "./react-library.json": "./react-library.json",
+    ".": "./base.json"
+  }
+}
