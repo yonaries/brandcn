@@ -1,7 +1,7 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import List from '../../src/commands/list.js'
-import {getVariantType} from '../../src/utils/fs.js'
+import { getVariantType } from '../../src/utils/fs.js'
 
 describe('List command', () => {
   describe('command validation', () => {

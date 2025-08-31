@@ -1,7 +1,7 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import Add from '../../src/commands/add.js'
-import {validateLogoNames} from '../../src/utils/validate.js'
+import { validateLogoNames } from '../../src/utils/validate.js'
 
 describe('Add command', () => {
   describe('command validation', () => {

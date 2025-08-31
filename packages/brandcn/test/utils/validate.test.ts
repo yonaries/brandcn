@@ -1,6 +1,6 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import {parseLogoName, validateLogoNames} from '../../src/utils/validate'
+import { parseLogoName, validateLogoNames } from '../../src/utils/validate'
 
 describe('validate utilities', () => {
   describe('validateLogoNames', () => {
