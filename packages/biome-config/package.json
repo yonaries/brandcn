@@ -5,11 +5,11 @@
   "files": [
     "library.json",
     "next.json",
-    "react-internal.json"
+    "react-internals.json"
   ],
   "exports": {
     "./library": "./library.json",
     "./next": "./next.json",
-    "./react-internal": "./react-internal.json"
+    "./react-internals": "./react-internals.json"
   }
 }
