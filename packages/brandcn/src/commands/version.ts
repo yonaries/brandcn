@@ -1,8 +1,8 @@
-import { Command } from '@oclif/core'
+import {Command} from '@oclif/core'
 import fs from 'fs-extra'
-const { readFileSync } = fs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+const {readFileSync} = fs
+import {dirname, join} from 'node:path'
+import {fileURLToPath} from 'node:url'
 
 export default class Version extends Command {
   static override description = 'Display version information'

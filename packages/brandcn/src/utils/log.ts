@@ -1,5 +1,5 @@
 import * as p from '@clack/prompts'
-import ora, { type Ora } from 'ora'
+import ora, {Ora} from 'ora'
 
 export class LogoSpinner {
   private spinner: Ora

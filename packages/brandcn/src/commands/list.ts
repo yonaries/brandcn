@@ -1,17 +1,13 @@
 import * as p from '@clack/prompts'
-import { Command, Flags } from '@oclif/core'
+import {Command, Flags} from '@oclif/core'
 
-import { getAvailableLogos, getVariantType } from '../utils/fs.js'
-import { displayError } from '../utils/log.js'
+import {getAvailableLogos, getVariantType} from '../utils/fs.js'
+import {displayError} from '../utils/log.js'
 
 export default class List extends Command {
   static override args = {}
   static override description = 'List all available brand logos'
-  static override examples = [
-    '$ brandcn list',
-    '$ brandcn list --search react',
-    '$ brandcn list --variants',
-  ]
+  static override examples = ['$ brandcn list', '$ brandcn list --search react', '$ brandcn list --variants']
   static override flags = {
     search: Flags.string({
       char: 's',
@@ -24,7 +20,7 @@ export default class List extends Command {
   }
 
   public async run(): Promise<void> {
-    const { flags } = await this.parse(List)
+    const {flags} = await this.parse(List)
 
     try {
       const availableLogos = await getAvailableLogos()
@@ -55,9 +51,7 @@ export default class List extends Command {
         this.displayLogosSimple(filteredLogos, flags.search)
       }
     } catch (error) {
-      displayError(
-        `Failed to load logos: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
+      displayError(`Failed to load logos: ${error instanceof Error ? error.message : 'Unknown error'}`)
       this.exit(1)
     }
   }
@@ -80,7 +74,7 @@ export default class List extends Command {
         groups.set(baseName, [])
       }
 
-      groups.get(baseName)?.push(logo)
+      groups.get(baseName)!.push(logo)
     }
 
     // Sort groups by base name

@@ -6,16 +6,11 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "check": {
-      "dependsOn": ["^check"]
-    },
-    "check:fix": {
-      "dependsOn": ["^check:fix"]
+    "lint": {
+      "dependsOn": ["^lint"]
     },
     "test": {
-      "dependsOn": ["^test"],
-      "inputs": ["packages/brandcn/**"],
-      "outputs": []
+      "dependsOn": ["^test"]
     },
     "dev": {
       "cache": false,
@@ -23,9 +18,6 @@
     },
     "clean": {
       "cache": false
-    },
-    "biome:ci": {
-      "dependsOn": ["^biome:ci"]
     }
   }
 }

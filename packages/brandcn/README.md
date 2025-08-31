@@ -15,7 +15,7 @@ npx brandcn list
 #npm
 npx brandcn add vercel nextjs react
 
-#pnpm
+#pnpm 
 pnpm dlx brandcn add vercel nextjs react
 
 #bun

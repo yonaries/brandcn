@@ -43,13 +43,21 @@
       "strict": false,
       "enableJsonFlag": false,
       "isESM": true,
-      "relativePath": ["dist", "commands", "add.js"]
+      "relativePath": [
+        "dist",
+        "commands",
+        "add.js"
+      ]
     },
     "list": {
       "aliases": [],
       "args": {},
       "description": "List all available brand logos",
-      "examples": ["$ brandcn list", "$ brandcn list --search react", "$ brandcn list --variants"],
+      "examples": [
+        "$ brandcn list",
+        "$ brandcn list --search react",
+        "$ brandcn list --variants"
+      ],
       "flags": {
         "search": {
           "char": "s",
@@ -76,7 +84,11 @@
       "strict": true,
       "enableJsonFlag": false,
       "isESM": true,
-      "relativePath": ["dist", "commands", "list.js"]
+      "relativePath": [
+        "dist",
+        "commands",
+        "list.js"
+      ]
     },
     "version": {
       "aliases": [],
@@ -92,7 +104,11 @@
       "strict": true,
       "enableJsonFlag": false,
       "isESM": true,
-      "relativePath": ["dist", "commands", "version.js"]
+      "relativePath": [
+        "dist",
+        "commands",
+        "version.js"
+      ]
     }
   },
   "version": "0.1.1"
