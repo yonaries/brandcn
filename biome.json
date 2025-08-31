@@ -9,7 +9,7 @@
 			"**/.turbo/**",
 			"./packages/ui/components.json",
 			"./commitlint.config.js",
-			"./.lintstagedrc.js",
+			"./.lintstagedrc.json",
 			"./apps/docs/.source/source.config.mjs"
 		]
 	}
