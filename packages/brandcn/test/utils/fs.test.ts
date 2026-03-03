@@ -312,7 +312,7 @@ describe("fs utilities", () => {
       expect(
         results.some(
           (result) =>
-            result.logoName === "vercel" &&
+            "vercel" === result.logoName &&
             result.success &&
             !result.skipped &&
             result.createdFiles?.includes("vercel.tsx"),

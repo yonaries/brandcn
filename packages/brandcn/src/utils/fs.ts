@@ -32,7 +32,10 @@ async function logoExists(
   extension: "svg" | "tsx" = "svg",
 ): Promise<boolean> {
   try {
-    await access(path.join(basePath, `${logoName}.${extension}`), constants.F_OK)
+    await access(
+      path.join(basePath, `${logoName}.${extension}`),
+      constants.F_OK,
+    )
     return true
   } catch {
     return false
