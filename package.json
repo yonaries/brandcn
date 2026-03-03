@@ -12,9 +12,13 @@
     "clean": "turbo clean",
     "format": "oxfmt --write .",
     "check": "oxlint . && oxfmt --check .",
-    "check:fix": "oxlint --fix . && oxfmt --write ."
+    "check:fix": "oxlint --fix . && oxfmt --write .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "bun run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "@workspace/typescript-config": "workspace:*",
     "lint-staged": "^16.3.2",
     "oxfmt": "^0.1.0",
