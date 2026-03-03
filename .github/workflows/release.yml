@@ -2,7 +2,8 @@ name: release
 
 on:
   push:
-    branches: [main]
+    tags:
+      - '*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -12,11 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -33,12 +35,8 @@ jobs:
       - name: Build all packages
         run: bun run build
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: bun run version-packages
-          publish: bun run release
+      - name: Publish packages
+        run: bun run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
