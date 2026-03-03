@@ -97,7 +97,7 @@ Use `brandcn list` to see all available logos, or `brandcn list --search <term>`
 
 1. Logos are saved to `components/logos/` by default
 2. If the directory doesn't exist, you'll be prompted to choose a custom path
-3. Each logo is saved as an optimized SVG file
+3. Each logo is saved as an optimized SVG file and a matching TSX component
 4. Existing files are automatically skipped
 
 ## Contributing

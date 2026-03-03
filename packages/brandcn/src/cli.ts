@@ -14,7 +14,7 @@ import { color } from "./utils/style.js"
 interface CommandDefinition {
   description: string
   examples: readonly string[]
-  flags: { [key: string]: { char: string description: string } }
+  flags: { [key: string]: { char: string; description: string } }
   name: string
   usage: string
 }

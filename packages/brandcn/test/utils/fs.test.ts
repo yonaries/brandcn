@@ -10,6 +10,7 @@ import {
   getAvailableLogos,
   getLibraryPath,
   getTargetLogosPath,
+  logoComponentExistsInTarget,
   logoExistsInLibrary,
   logoExistsInTarget,
   processLogos,
@@ -107,6 +108,20 @@ describe("fs utilities", () => {
       writeFileSync("./vercel.svg", "<svg></svg>")
 
       const exists = await logoExistsInTarget("vercel")
+      expect(exists).toBe(true)
+    })
+  })
+
+  describe("logoComponentExistsInTarget", () => {
+    it("should return false when component does not exist in target", async () => {
+      const exists = await logoComponentExistsInTarget("vercel")
+      expect(exists).toBe(false)
+    })
+
+    it("should return true when component exists in target (cwd)", async () => {
+      writeFileSync("./vercel.tsx", "export default function VercelLogo() {}")
+
+      const exists = await logoComponentExistsInTarget("vercel")
       expect(exists).toBe(true)
     })
   })
@@ -259,6 +274,7 @@ describe("fs utilities", () => {
 
       // Check at least one file was created in cwd
       expect(existsSync("./vercel.svg")).toBe(true)
+      expect(existsSync("./vercel.tsx")).toBe(true)
     })
 
     it("should handle non-existing logos gracefully", async () => {
@@ -282,6 +298,24 @@ describe("fs utilities", () => {
       expect(
         skippedResults.every(
           (r) => r.success && r.reason?.includes("already exists"),
+        ),
+      ).toBe(true)
+    })
+
+    it("should create missing tsx component when svg already exists", async () => {
+      writeFileSync("./vercel.svg", "<svg></svg>")
+
+      const results = await processLogos(["vercel"])
+
+      expect(existsSync("./vercel.svg")).toBe(true)
+      expect(existsSync("./vercel.tsx")).toBe(true)
+      expect(
+        results.some(
+          (result) =>
+            result.logoName === "vercel" &&
+            result.success &&
+            !result.skipped &&
+            result.createdFiles?.includes("vercel.tsx"),
         ),
       ).toBe(true)
     })

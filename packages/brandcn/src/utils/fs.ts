@@ -1,5 +1,5 @@
 import fs from "fs-extra"
-const { access, copy, ensureDir, readdir } = fs
+const { access, copy, ensureDir, readdir, writeFile } = fs
 import { constants } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -29,9 +29,10 @@ export function getTargetLogosPath(): string {
 async function logoExists(
   logoName: string,
   basePath: string,
+  extension: "svg" | "tsx" = "svg",
 ): Promise<boolean> {
   try {
-    await access(path.join(basePath, `${logoName}.svg`), constants.F_OK)
+    await access(path.join(basePath, `${logoName}.${extension}`), constants.F_OK)
     return true
   } catch {
     return false
@@ -44,6 +45,12 @@ export async function logoExistsInLibrary(logoName: string): Promise<boolean> {
 
 export async function logoExistsInTarget(logoName: string): Promise<boolean> {
   return logoExists(logoName, getTargetLogosPath())
+}
+
+export async function logoComponentExistsInTarget(
+  logoName: string,
+): Promise<boolean> {
+  return logoExists(logoName, getTargetLogosPath(), "tsx")
 }
 
 export async function ensureTargetDirectory(): Promise<void> {
@@ -62,6 +69,50 @@ export async function copyLogoToTarget(logoName: string): Promise<void> {
     }
     throw error
   }
+}
+
+function toPascalCase(value: string): string {
+  const pascal = value
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("")
+
+  const safePascal = 0 < pascal.length ? pascal : "Logo"
+  return /^[A-Za-z]/.test(safePascal) ? safePascal : `Logo${safePascal}`
+}
+
+function getComponentName(logoName: string): string {
+  const baseName = toPascalCase(logoName)
+  return baseName.endsWith("Logo") ? baseName : `${baseName}Logo`
+}
+
+function createLogoComponentSource(logoName: string): string {
+  const componentName = getComponentName(logoName)
+
+  return [
+    'import type { ComponentProps } from "react"',
+    "",
+    `const src = new URL("./${logoName}.svg", import.meta.url).toString()`,
+    "",
+    `export type ${componentName}Props = Omit<ComponentProps<"img">, "src">`,
+    "",
+    `export function ${componentName}(props: ${componentName}Props) {`,
+    `  return <img src={src} alt="${logoName}" {...props} />`,
+    "}",
+    "",
+    `export default ${componentName}`,
+    "",
+  ].join("\n")
+}
+
+export async function createLogoComponentInTarget(
+  logoName: string,
+): Promise<void> {
+  const destPath = path.join(getTargetLogosPath(), `${logoName}.tsx`)
+  await writeFile(destPath, createLogoComponentSource(logoName), {
+    flag: "wx",
+  })
 }
 
 export async function getAvailableLogos(): Promise<string[]> {
@@ -182,21 +233,44 @@ export async function processLogos(
       }
 
       for (const variant of filteredVariants) {
-        if (await logoExistsInTarget(variant)) {
+        try {
+          const createdFiles: string[] = []
+          const skippedFiles: string[] = []
+
+          if (await logoExistsInTarget(variant)) {
+            skippedFiles.push(`${variant}.svg`)
+          } else {
+            await copyLogoToTarget(variant)
+            createdFiles.push(`${variant}.svg`)
+          }
+
+          if (await logoComponentExistsInTarget(variant)) {
+            skippedFiles.push(`${variant}.tsx`)
+          } else {
+            await createLogoComponentInTarget(variant)
+            createdFiles.push(`${variant}.tsx`)
+          }
+
+          const isSkipped = 0 === createdFiles.length
+
           results.push({
+            createdFiles: isSkipped ? undefined : createdFiles,
             logoName: variant,
-            reason: "Logo already exists in logos directory",
-            skipped: true,
+            reason: isSkipped
+              ? "Logo SVG and TSX component already exists in logos directory"
+              : undefined,
+            skipped: isSkipped,
+            skippedFiles: 0 < skippedFiles.length ? skippedFiles : undefined,
             success: true,
           })
-          continue
+        } catch (error) {
+          results.push({
+            error:
+              error instanceof Error ? error.message : "Unknown error occurred",
+            logoName: variant,
+            success: false,
+          })
         }
-
-        await copyLogoToTarget(variant)
-        results.push({
-          logoName: variant,
-          success: true,
-        })
       }
     } catch (error) {
       results.push({

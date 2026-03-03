@@ -7,9 +7,11 @@ export interface ProcessLogosOptions {
 }
 
 export interface LogoOperationResult {
+  createdFiles?: string[]
   error?: string
   logoName: string
   reason?: string
   skipped?: boolean
+  skippedFiles?: string[]
   success: boolean
 }

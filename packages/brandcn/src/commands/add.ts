@@ -98,14 +98,20 @@ const displayResults = (results: LogoOperationResult[]): void => {
   if (0 < successful.length) {
     log.success(color.success("Added logos"))
     for (const result of successful) {
-      log.step(`${color.success("added")} ${result.logoName}.svg`)
+      const files =
+        result.createdFiles?.join(", ") ??
+        `${result.logoName}.svg, ${result.logoName}.tsx`
+      log.step(`${color.success("added")} ${files}`)
     }
   }
 
   if (0 < skipped.length) {
     log.info(color.warning("Skipped (already exists)"))
     for (const result of skipped) {
-      log.step(`${color.warning("skipped")} ${result.logoName}.svg`)
+      const files =
+        result.skippedFiles?.join(", ") ??
+        `${result.logoName}.svg, ${result.logoName}.tsx`
+      log.step(`${color.warning("skipped")} ${files}`)
     }
   }
 
