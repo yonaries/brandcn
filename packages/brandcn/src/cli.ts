@@ -11,10 +11,15 @@ import {
 import { displayError } from "./utils/log.js"
 import { color } from "./utils/style.js"
 
+interface FlagDefinition {
+  char: string
+  description: string
+}
+
 interface CommandDefinition {
   description: string
   examples: readonly string[]
-  flags: { [key: string]: { char: string description: string } }
+  flags: { [key: string]: FlagDefinition }
   name: string
   usage: string
 }

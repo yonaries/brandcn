@@ -4,3 +4,11 @@ pre-commit:
     - name: lint-and-format
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: bunx oxlint --fix {staged_files} && bunx oxfmt --write {staged_files}
+
+pre-push:
+  jobs:
+    - name: test
+      run: bun run test
+
+    - name: build
+      run: bun run build
