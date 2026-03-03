@@ -10,17 +10,17 @@
     "dev": "turbo dev",
     "test": "turbo test",
     "clean": "turbo clean",
-    "format": "biome format --write .",
-    "check": "biome check .",
-    "check:fix": "biome check --write .",
-    "biome:ci": "biome ci ."
+    "format": "oxfmt --write .",
+    "check": "oxlint . && oxfmt --check .",
+    "check:fix": "oxlint --fix . && oxfmt --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
     "@workspace/typescript-config": "workspace:*",
-    "lint-staged": "^16.1.5",
-    "turbo": "^2.5.6",
-    "typescript": "^5.8.2"
+    "lint-staged": "^16.3.2",
+    "oxfmt": "^0.1.0",
+    "oxlint": "^0.17.0",
+    "turbo": "^2.8.12",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0",

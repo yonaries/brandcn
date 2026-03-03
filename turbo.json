@@ -23,9 +23,6 @@
     },
     "clean": {
       "cache": false
-    },
-    "biome:ci": {
-      "dependsOn": ["^biome:ci"]
     }
   }
 }

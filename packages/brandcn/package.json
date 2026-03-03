@@ -65,10 +65,10 @@
     "build": "shx rm -rf dist && tsc -b",
     "clean": "shx rm -rf dist && rm -rf components",
     "dev": "NODE_ENV=development ./bin/dev.js",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
     "postpack": "shx rm -f oclif.manifest.json",
-    "posttest": "pnpm run lint",
+    "posttest": "bun run lint",
     "prepack": "oclif manifest && oclif readme",
     "test": "vitest run",
     "test:watch": "vitest"

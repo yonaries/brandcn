@@ -1,0 +1,20 @@
+{
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 80,
+	"singleQuote": true,
+	"jsxSingleQuote": true,
+	"trailingComma": "es5",
+	"semi": true,
+	"arrowParens": "always",
+	"sortImports": {},
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/.next/**",
+		"**/dist/**",
+		"**/.turbo/**",
+		"**/build/**",
+		"**/.cache/**",
+		"coverage/**"
+	]
+}

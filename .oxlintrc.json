@@ -1,0 +1,25 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "import", "jsx-a11y"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"style": "warn"
+	},
+	"rules": {
+		"@typescript-eslint/consistent-type-imports": "error",
+		"@typescript-eslint/no-non-null-assertion": "error",
+		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+		"@typescript-eslint/no-explicit-any": "error",
+		"no-array-constructor": "error"
+	},
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/.next/**",
+		"**/.turbo/**",
+		"**/build/**",
+		"**/.cache/**",
+		"coverage/**"
+	]
+}
