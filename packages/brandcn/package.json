@@ -8,23 +8,20 @@
   },
   "bugs": "https://github.com/yonaries/brandcn/issues",
   "dependencies": {
+    "@clack/core": "^0.5.0",
     "@clack/prompts": "^0.11.0",
-    "@oclif/core": "^4",
-    "@oclif/plugin-help": "^6",
-    "@oclif/plugin-plugins": "^5",
+    "execa": "^9.6.0",
     "fs-extra": "^11.3.1",
-    "ora": "^8.1.0",
+    "picocolors": "^1.1.1",
     "zod": "^4.0.17",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "@oclif/test": "^4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "oclif": "^4",
     "shx": "^0.3.3",
     "ts-node": "^10",
     "typescript": "^5",
@@ -37,7 +34,6 @@
     "./bin",
     "./dist",
     "./library",
-    "./oclif.manifest.json",
     "LICENSE"
   ],
   "homepage": "https://github.com/yonaries/brandcn",
@@ -54,16 +50,6 @@
   "license": "MIT",
   "main": "dist/index.js",
   "type": "module",
-  "oclif": {
-    "bin": "brandcn",
-    "dirname": "brandcn",
-    "commands": "./dist/commands",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
-    ],
-    "topicSeparator": " "
-  },
   "repository": "yonaries/brandcn",
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
@@ -71,9 +57,8 @@
     "dev": "NODE_ENV=development ./bin/dev.js",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
-    "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "bun run lint",
-    "prepack": "oclif manifest && oclif readme",
+    "prepack": "bun run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -1,143 +1,210 @@
-import * as p from "@clack/prompts"
-import { Command, Flags } from "@oclif/core"
+import { log, outro } from "@clack/prompts"
+import { parseArgs } from "node:util"
 
-import type { LogoOperationResult } from "../types/logos.js"
+import type {
+  LogoOperationResult,
+  ProcessLogosOptions,
+} from "../types/logos.js"
 
 import { processLogos } from "../utils/fs.js"
 import { LogoSpinner, displayError, displayUsage } from "../utils/log.js"
+import { color } from "../utils/style.js"
 import { validateLogoNames } from "../utils/validate.js"
 
-export default class Add extends Command {
-  static args = {}
-  static description = "Add brand logos to your project"
-  static examples = [
+const addOptions = {
+  dark: {
+    short: "d",
+    type: "boolean",
+  },
+  help: {
+    short: "h",
+    type: "boolean",
+  },
+  light: {
+    short: "l",
+    type: "boolean",
+  },
+  wordmark: {
+    short: "w",
+    type: "boolean",
+  },
+} as const
+
+export const addCommand = {
+  description: "Add brand logos to your project",
+  examples: [
     "$ brandcn add vercel",
     "$ brandcn add vercel neon react",
     "$ brandcn add vercel --dark --light",
     "$ brandcn add github --wordmark",
     "$ bunx brandcn@latest add nextjs tailwindcss",
-  ]
-  static flags = {
-    dark: Flags.boolean({
+  ],
+  flags: {
+    dark: {
       char: "d",
       description: "Add only dark variant of the logo",
-    }),
-    light: Flags.boolean({
+    },
+    help: {
+      char: "h",
+      description: "Show help for the add command",
+    },
+    light: {
       char: "l",
       description: "Add only light variant of the logo",
-    }),
-    wordmark: Flags.boolean({
+    },
+    wordmark: {
       char: "w",
       description: "Add only wordmark variant of the logo",
-    }),
+    },
+  },
+  name: "add",
+  usage: "brandcn add <logo-name> [logo-names...] [options]",
+} as const
+
+export interface AddParsedArgs {
+  flags: ProcessLogosOptions
+  help: boolean
+  logoNames: string[]
+}
+
+export const parseAddArgs = (args: string[]): AddParsedArgs => {
+  const parsed = parseArgs({
+    allowPositionals: true,
+    args,
+    options: addOptions,
+    strict: true,
+  })
+
+  return {
+    flags: {
+      dark: Boolean(parsed.values.dark),
+      light: Boolean(parsed.values.light),
+      wordmark: Boolean(parsed.values.wordmark),
+    },
+    help: Boolean(parsed.values.help),
+    logoNames: parsed.positionals,
   }
-  static strict = false
+}
 
-  public async run(): Promise<void> {
-    const { argv, flags } = await this.parse(Add)
-    const logoNames = argv as string[]
+const displayResults = (results: LogoOperationResult[]): void => {
+  log.message("")
 
-    if (!logoNames || logoNames.length === 0) {
-      displayError("No logo names provided")
-      displayUsage()
-      this.exit(1)
+  const successful = results.filter(
+    (result) => result.success && !result.skipped,
+  )
+  const skipped = results.filter((result) => result.success && result.skipped)
+  const failed = results.filter((result) => !result.success)
+
+  if (0 < successful.length) {
+    log.success(color.success("Added logos"))
+    for (const result of successful) {
+      log.step(`${color.success("added")} ${result.logoName}.svg`)
+    }
+  }
+
+  if (0 < skipped.length) {
+    log.info(color.warning("Skipped (already exists)"))
+    for (const result of skipped) {
+      log.step(`${color.warning("skipped")} ${result.logoName}.svg`)
+    }
+  }
+
+  if (0 < failed.length) {
+    log.error(color.error("Failed"))
+    for (const result of failed) {
+      log.step(`${color.error("error")} ${result.logoName}: ${result.error}`)
+    }
+  }
+}
+
+export const runAddCommand = async (
+  logoNames: string[],
+  flags: ProcessLogosOptions,
+): Promise<number> => {
+  if (0 === logoNames.length) {
+    displayError("No logo names provided")
+    displayUsage()
+    return 1
+  }
+
+  const validation = validateLogoNames(logoNames)
+
+  if (validation.hasErrors) {
+    displayError("Invalid logo names:")
+    for (const error of validation.errors) {
+      log.step(`${error.name}: ${error.error}`)
     }
 
-    const validation = validateLogoNames(logoNames)
+    displayUsage()
+    return 1
+  }
 
-    if (validation.hasErrors) {
-      displayError("Invalid logo names:")
-      for (const error of validation.errors) {
-        console.log(`  • ${error.name}: ${error.error}`)
-      }
+  if (0 === validation.validNames.length) {
+    displayError("No valid logo names provided")
+    displayUsage()
+    return 1
+  }
 
-      console.log("")
-      displayUsage()
-      this.exit(1)
-    }
+  const spinner = new LogoSpinner(
+    `Processing ${validation.validNames.length} logo(s)...`,
+  )
+  spinner.start()
 
-    if (validation.validNames.length === 0) {
-      displayError("No valid logo names provided")
-      displayUsage()
-      this.exit(1)
-    }
+  try {
+    const results = await processLogos(validation.validNames, flags)
 
-    const spinner = new LogoSpinner(
-      `Processing ${validation.validNames.length} logo(s)...`,
-    )
-    spinner.start()
+    spinner.stop()
+    displayResults(results)
 
-    try {
-      const results = await processLogos(validation.validNames, flags)
+    const hasFailures = results.some((result) => !result.success)
+    const hasSuccesses = results.some((result) => result.success)
+    const successfulCount = results.filter(
+      (result) => result.success && !result.skipped,
+    ).length
+    const skippedCount = results.filter(
+      (result) => result.success && result.skipped,
+    ).length
 
-      spinner.stop()
-
-      this.displayResultsWithClack(results)
-
-      const hasFailures = results.some((r) => !r.success)
-      const hasSuccesses = results.some((r) => r.success)
-      const successfulCount = results.filter(
-        (r) => r.success && !r.skipped,
-      ).length
-      const skippedCount = results.filter((r) => r.success && r.skipped).length
-
-      if (hasFailures && !hasSuccesses) {
-        p.outro("❌ All operations failed. Please check the errors above.")
-        this.exit(1)
-      } else if (hasFailures && hasSuccesses) {
-        p.outro(
-          `⚠️  Completed with warnings. ${successfulCount} logos added${
-            skippedCount > 0 ? `, ${skippedCount} skipped` : ""
-          }.`,
-        )
-      } else {
-        const message =
-          successfulCount > 0
-            ? `🎉 Successfully added ${successfulCount} logo${
-                successfulCount === 1 ? "" : "s"
-              }${skippedCount > 0 ? ` (${skippedCount} already existed)` : ""}!`
-            : "✨ All logos were already present in your project."
-        p.outro(message)
-      }
-    } catch (error) {
-      spinner.fail("Operation failed")
-      p.outro(
-        `❌ ${
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred"
-        }`,
+    if (hasFailures && !hasSuccesses) {
+      outro(
+        color.error("All operations failed. Please check the errors above."),
       )
-      this.exit(1)
-    }
-  }
-
-  private displayResultsWithClack(results: LogoOperationResult[]): void {
-    console.log("")
-
-    const successful = results.filter((r) => r.success && !r.skipped)
-    const skipped = results.filter((r) => r.success && r.skipped)
-    const failed = results.filter((r) => !r.success)
-
-    if (successful.length > 0) {
-      p.log.success("Added logos:")
-      for (const result of successful) {
-        p.log.step(`✨ ${result.logoName}.svg`)
-      }
+      return 1
     }
 
-    if (skipped.length > 0) {
-      p.log.info("Skipped (already exist):")
-      for (const result of skipped) {
-        p.log.step(`⏭️  ${result.logoName}.svg`)
-      }
+    if (hasFailures && hasSuccesses) {
+      const skippedMessage = 0 < skippedCount ? `, ${skippedCount} skipped` : ""
+      outro(
+        color.warning(
+          `Completed with warnings. ${successfulCount} logos added${skippedMessage}.`,
+        ),
+      )
+      return 0
     }
 
-    if (failed.length > 0) {
-      p.log.error("Failed:")
-      for (const result of failed) {
-        p.log.step(`❌ ${result.logoName}: ${result.error}`)
-      }
+    if (0 < successfulCount) {
+      const logoSuffix = 1 === successfulCount ? "" : "s"
+      const skippedMessage =
+        0 < skippedCount ? ` (${skippedCount} already existed)` : ""
+      outro(
+        color.success(
+          `Successfully added ${successfulCount} logo${logoSuffix}${skippedMessage}.`,
+        ),
+      )
+      return 0
     }
+
+    outro(color.info("All logos were already present in your project."))
+    return 0
+  } catch (error) {
+    spinner.fail("Operation failed")
+
+    if (error instanceof Error) {
+      outro(color.error(error.message))
+      return 1
+    }
+
+    outro(color.error("An unexpected error occurred"))
+    return 1
   }
 }

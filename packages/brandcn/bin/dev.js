@@ -1,8 +1,8 @@
 #!/usr/bin/env -S node --loader ts-node/esm --disable-warning=ExperimentalWarning
 
-// Set development environment for realistic network delay simulation
 process.env.NODE_ENV = "development"
 
-import { execute } from "@oclif/core"
+import { runCli } from "../src/cli.ts"
 
-await execute({ development: true, dir: import.meta.url })
+const exitCode = await runCli(process.argv.slice(2))
+process.exitCode = exitCode

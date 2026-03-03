@@ -1,94 +1,71 @@
-#!/bin/bash
+#!/bin/sh
 
-# Pre-commit hook for brandcn
-# This script runs type checking, linting, testing, and build validation before commit
+if [ "$LEFTHOOK_VERBOSE" = "1" -o "$LEFTHOOK_VERBOSE" = "true" ]; then
+  set -x
+fi
 
-set -e  # Exit on any error
+if [ "$LEFTHOOK" = "0" ]; then
+  exit 0
+fi
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[Pre-commit]${NC} $1"
+call_lefthook()
+{
+  if test -n "$LEFTHOOK_BIN"
+  then
+    "$LEFTHOOK_BIN" "$@"
+  elif lefthook -h >/dev/null 2>&1
+  then
+    lefthook "$@"
+  elif /Users/yonaries/projects/brandcn/node_modules/.bun/lefthook-darwin-arm64@2.1.2/node_modules/lefthook-darwin-arm64/bin/lefthook -h >/dev/null 2>&1
+  then
+    /Users/yonaries/projects/brandcn/node_modules/.bun/lefthook-darwin-arm64@2.1.2/node_modules/lefthook-darwin-arm64/bin/lefthook "$@"
+  else
+    dir="$(git rev-parse --show-toplevel)"
+    osArch=$(uname | tr '[:upper:]' '[:lower:]')
+    cpuArch=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/x64/')
+    if test -f "$dir/node_modules/lefthook-${osArch}-${cpuArch}/bin/lefthook"
+    then
+      "$dir/node_modules/lefthook-${osArch}-${cpuArch}/bin/lefthook" "$@"
+    elif test -f "$dir/node_modules/@evilmartians/lefthook/bin/lefthook-${osArch}-${cpuArch}/lefthook"
+    then
+      "$dir/node_modules/@evilmartians/lefthook/bin/lefthook-${osArch}-${cpuArch}/lefthook" "$@"
+    elif test -f "$dir/node_modules/@evilmartians/lefthook-installer/bin/lefthook"
+    then
+      "$dir/node_modules/@evilmartians/lefthook-installer/bin/lefthook" "$@"
+    elif test -f "$dir/node_modules/lefthook/bin/index.js"
+    then
+      "$dir/node_modules/lefthook/bin/index.js" "$@"
+    elif go tool lefthook -h >/dev/null 2>&1
+    then
+      go tool lefthook "$@"
+    elif bundle exec lefthook -h >/dev/null 2>&1
+    then
+      bundle exec lefthook "$@"
+    elif yarn lefthook -h >/dev/null 2>&1
+    then
+      yarn lefthook "$@"
+    elif pnpm lefthook -h >/dev/null 2>&1
+    then
+      pnpm lefthook "$@"
+    elif swift package lefthook >/dev/null 2>&1
+    then
+      swift package --build-path .build/lefthook --disable-sandbox lefthook "$@"
+    elif command -v mint >/dev/null 2>&1
+    then
+      mint run csjones/lefthook-plugin "$@"
+    elif uv run lefthook -h >/dev/null 2>&1
+    then
+      uv run lefthook "$@"
+    elif mise exec -- lefthook -h >/dev/null 2>&1
+    then
+      mise exec -- lefthook "$@"
+    elif devbox run lefthook -h >/dev/null 2>&1
+    then
+      devbox run lefthook "$@"
+    else
+      echo "Can't find lefthook in PATH"
+    fi
+  fi
 }
 
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-# Check if pnpm is available
-if ! command -v pnpm &> /dev/null; then
-    print_error "pnpm is required but not installed. Please install pnpm first."
-    exit 1
-fi
-
-# 2. Linting
-if pnpm dlx lint-staged; then
-    print_success "Lint checks passed"
-else
-    print_error "Lint checks failed"
-    exit 1
-fi
-
-# 3. Testing
-if pnpm run test; then
-    print_success "All tests passed"
-else
-    print_error "Tests failed"
-    exit 1
-fi
-
-# 4. Build validation
-if pnpm run build; then
-    print_success "Build validation passed"
-else
-    print_error "Build validation failed"
-    exit 1
-fi
-
-# 5. Versioning
-GH_API="https://api.github.com/repos/yonaries/brandcn/releases/latest"
-print_status "Fetching current version from GitHub releases..."
-
-response=$(curl -sS -H "Accept: application/vnd.github+json" "$GH_API")
-
-tag=$(echo "$response" | jq -r '.tag_name // empty')
-
-if [[ -n "$tag" && "$tag" != "null" ]]; then
-    version_from_source="${tag#v}"
-    print_success "Latest GitHub release found: $tag"
-else
-    print_warning "Could not retrieve GitHub release. Falling back to local package.json version."
-    version_from_source=$(jq -r '.version' packages/brandcn/package.json)
-fi
-
-# Split version into components
-IFS='.' read -r major minor patch <<< "$version_from_source"
-
-# Increment patch version
-new_patch=$((patch + 1))
-
-# Create new version string
-new_version="$major.$minor.$new_patch"
-
-# Update version in package.json using jq
-jq --arg new_version "$new_version" '.version = $new_version' packages/brandcn/package.json > packages/brandcn/package.json.tmp && mv packages/brandcn/package.json.tmp packages/brandcn/package.json
-
-# Add package.json to the commit
-git add packages/brandcn/package.json 
-
-print_success "All pre-commit checks passed! 🎉"
-echo ""
+call_lefthook run "pre-commit" "$@"

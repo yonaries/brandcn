@@ -8,6 +8,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "prepare": "lefthook install --force",
     "test": "turbo test",
     "clean": "turbo clean",
     "format": "oxfmt --write .",
@@ -20,7 +21,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
     "@workspace/typescript-config": "workspace:*",
-    "lint-staged": "^16.3.2",
+    "lefthook": "^2.1.2",
     "oxfmt": "^0.1.0",
     "oxlint": "^0.17.0",
     "turbo": "^2.8.12",

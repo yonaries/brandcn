@@ -1,11 +1,13 @@
-import * as p from "@clack/prompts"
-import ora, { type Ora } from "ora"
+import { spinner as createSpinner, log } from "@clack/prompts"
+
+import { color } from "./style.js"
 
 export class LogoSpinner {
-  private spinner: Ora
+  private spinner = createSpinner()
+  private text: string
 
   constructor(text: string) {
-    this.spinner = ora(text)
+    this.text = text
   }
 
   /**
@@ -13,14 +15,14 @@ export class LogoSpinner {
    * @param text - Error message
    */
   fail(text?: string): void {
-    this.spinner.fail(text)
+    this.spinner.stop(text ?? this.text, 1)
   }
 
   /**
    * Starts the spinner
    */
   start(): void {
-    this.spinner.start()
+    this.spinner.start(this.text)
   }
 
   /**
@@ -28,28 +30,25 @@ export class LogoSpinner {
    * @param text - Final text
    */
   stop(text?: string): void {
-    this.spinner.stop()
-    if (text) {
-      console.log(text)
-    }
+    this.spinner.stop(text ?? this.text)
   }
 }
 
 export function displayError(message: string): void {
-  p.log.error(message)
+  log.error(color.error(message))
 }
 
 export function displayUsage(): void {
-  console.log("")
-  p.log.info("📖 Usage:")
-  p.log.step("  brandcn add <logo-name> [logo-names...]")
-  console.log("")
-  p.log.info("📝 Examples:")
-  p.log.step("  brandcn add vercel")
-  p.log.step("  brandcn add vercel neon react")
-  p.log.step("  bunx brandcn@latest add nextjs tailwindcss")
-  console.log("")
-  p.log.info(
-    "🔍 Logo names must contain only alphanumeric characters, hyphens, or underscores.",
+  log.message("")
+  log.info(color.info("Usage"))
+  log.step("  brandcn add <logo-name> [logo-names...]")
+  log.message("")
+  log.info(color.info("Examples"))
+  log.step("  brandcn add vercel")
+  log.step("  brandcn add vercel neon react")
+  log.step("  bunx brandcn@latest add nextjs tailwindcss")
+  log.message("")
+  log.info(
+    "Logo names must contain only alphanumeric characters, hyphens, or underscores.",
   )
 }

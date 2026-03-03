@@ -1,40 +1,51 @@
 import { describe, expect, it } from "vitest"
 
-import List from "../../src/commands/list.js"
+import { listCommand, parseListArgs } from "../../src/commands/list.js"
 import { getVariantType } from "../../src/utils/fs.js"
 
-describe("List command", () => {
-  describe("command validation", () => {
+describe("list command", () => {
+  describe("metadata", () => {
     it("should have correct description", () => {
-      expect(List.description).toBe("List all available brand logos")
+      expect(listCommand.description).toBe("List all available brand logos")
     })
 
     it("should have examples", () => {
-      expect(List.examples).toBeDefined()
-      expect(List.examples.length).toBeGreaterThan(0)
-      expect(List.examples).toContain("$ brandcn list")
-      expect(List.examples).toContain("$ brandcn list --search react")
-      expect(List.examples).toContain("$ brandcn list --variants")
+      expect(listCommand.examples).toBeDefined()
+      expect(listCommand.examples.length).toBeGreaterThan(0)
+      expect(listCommand.examples).toContain("$ brandcn list")
+      expect(listCommand.examples).toContain("$ brandcn list --search react")
+      expect(listCommand.examples).toContain("$ brandcn list --variants")
     })
 
-    it("should have empty args object", () => {
-      expect(List.args).toEqual({})
-    })
-
-    it("should have search flag", () => {
-      expect(List.flags.search).toBeDefined()
-      expect(List.flags.search.char).toBe("s")
-      expect(List.flags.search.description).toBe(
-        "Search for logos containing the specified text",
+    it("should have usage", () => {
+      expect(listCommand.usage).toBe(
+        "brandcn list [--search <term>] [--variants]",
       )
     })
 
-    it("should have variants flag", () => {
-      expect(List.flags.variants).toBeDefined()
-      expect(List.flags.variants.char).toBe("v")
-      expect(List.flags.variants.description).toBe(
-        "Group logos by brand and show variants",
-      )
+    it("should expose expected flags", () => {
+      expect(listCommand.flags.search.char).toBe("s")
+      expect(listCommand.flags.variants.char).toBe("v")
+      expect(listCommand.flags.help.char).toBe("h")
+    })
+  })
+
+  describe("argument parsing", () => {
+    it("should parse --search and --variants", () => {
+      const parsed = parseListArgs(["--search", "react", "-v"])
+
+      expect(parsed.flags.search).toBe("react")
+      expect(parsed.flags.variants).toBe(true)
+      expect(parsed.help).toBe(false)
+    })
+
+    it("should parse --help", () => {
+      const parsed = parseListArgs(["--help"])
+      expect(parsed.help).toBe(true)
+    })
+
+    it("should throw for positional arguments", () => {
+      expect(() => parseListArgs(["unexpected"])).toThrow()
     })
   })
 
@@ -64,9 +75,3 @@ describe("List command", () => {
     })
   })
 })
-
-// Note: Integration tests that execute the CLI can be run manually using:
-// - pnpm run build && ./bin/run.js list
-// - pnpm run build && ./bin/run.js list --search react
-// - pnpm run build && ./bin/run.js list --variants
-// The unit tests above provide comprehensive coverage of the command logic.

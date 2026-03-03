@@ -1,26 +1,53 @@
 import { describe, expect, it } from "vitest"
 
-import Add from "../../src/commands/add.js"
+import { addCommand, parseAddArgs } from "../../src/commands/add.js"
 import { validateLogoNames } from "../../src/utils/validate.js"
 
-describe("Add command", () => {
-  describe("command validation", () => {
+describe("add command", () => {
+  describe("metadata", () => {
     it("should have correct description", () => {
-      expect(Add.description).toBe("Add brand logos to your project")
+      expect(addCommand.description).toBe("Add brand logos to your project")
     })
 
     it("should have examples", () => {
-      expect(Add.examples).toBeDefined()
-      expect(Add.examples.length).toBeGreaterThan(0)
-      expect(Add.examples).toContain("$ brandcn add vercel")
+      expect(addCommand.examples).toBeDefined()
+      expect(addCommand.examples.length).toBeGreaterThan(0)
+      expect(addCommand.examples).toContain("$ brandcn add vercel")
     })
 
-    it("should have strict mode disabled", () => {
-      expect(Add.strict).toBe(false)
+    it("should have usage", () => {
+      expect(addCommand.usage).toBe(
+        "brandcn add <logo-name> [logo-names...] [options]",
+      )
     })
 
-    it("should have empty args object", () => {
-      expect(Add.args).toEqual({})
+    it("should expose expected flags", () => {
+      expect(addCommand.flags.dark.char).toBe("d")
+      expect(addCommand.flags.light.char).toBe("l")
+      expect(addCommand.flags.wordmark.char).toBe("w")
+      expect(addCommand.flags.help.char).toBe("h")
+    })
+  })
+
+  describe("argument parsing", () => {
+    it("should parse logo names and flags", () => {
+      const parsed = parseAddArgs(["vercel", "neon", "--dark", "-w"])
+
+      expect(parsed.logoNames).toEqual(["vercel", "neon"])
+      expect(parsed.flags.dark).toBe(true)
+      expect(parsed.flags.wordmark).toBe(true)
+      expect(parsed.flags.light).toBe(false)
+      expect(parsed.help).toBe(false)
+    })
+
+    it("should parse --help", () => {
+      const parsed = parseAddArgs(["--help"])
+      expect(parsed.help).toBe(true)
+      expect(parsed.logoNames).toEqual([])
+    })
+
+    it("should throw for unknown options", () => {
+      expect(() => parseAddArgs(["--unknown"])).toThrow()
     })
   })
 
@@ -45,8 +72,3 @@ describe("Add command", () => {
     })
   })
 })
-
-// Note: Integration tests that execute the CLI can be run manually using:
-// - pnpm run build && ./bin/run.js add vercel
-// - pnpm run build && ./bin/run.js add vercel neon
-// The unit tests above provide comprehensive coverage of the command logic.

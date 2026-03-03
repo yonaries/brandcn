@@ -1,1 +1,1 @@
-export { run } from "@oclif/core"
+export { getVersion, runCli, runCli as run } from "./cli.js"
