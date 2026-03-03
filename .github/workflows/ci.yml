@@ -20,25 +20,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: '10.15.0'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix['node-version'] }}
-          cache: 'pnpm'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
 
-      - name: Lint and format code with Biome
-        run: pnpm run check
+      - name: Lint and format code
+        run: bun run check
 
       - name: Build all packages
-        run: pnpm run build
+        run: bun run build
 
       - name: Run tests
-        run: pnpm run test
+        run: bun run test
