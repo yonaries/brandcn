@@ -39,7 +39,7 @@ export function validateLogoNames(logoNames: string[]) {
 
   return {
     errors,
-    hasErrors: errors.length > 0,
+    hasErrors: 0 < errors.length,
     validNames,
   }
 }

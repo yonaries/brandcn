@@ -55,12 +55,12 @@ describe("validate utilities", () => {
 
       // Check error details
       const invalidNameError = result.errors.find(
-        (e) => e.name === "invalid@name",
+        (e) => "invalid@name" === e.name,
       )
       expect(invalidNameError).toBeDefined()
       expect(invalidNameError?.error).toContain("alphanumeric characters")
 
-      const emptyNameError = result.errors.find((e) => e.name === "")
+      const emptyNameError = result.errors.find((e) => "" === e.name)
       expect(emptyNameError).toBeDefined()
       expect(emptyNameError?.error).toContain("cannot be empty")
     })

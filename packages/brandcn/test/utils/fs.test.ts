@@ -253,7 +253,7 @@ describe("fs utilities", () => {
 
       expect(results.length).toBeGreaterThanOrEqual(2)
 
-      const vercelResults = results.filter((r) => r.logoName === "vercel")
+      const vercelResults = results.filter((r) => "vercel" === r.logoName)
       expect(vercelResults.length).toBeGreaterThan(0)
       expect(vercelResults.every((r) => r.success)).toBe(true)
 

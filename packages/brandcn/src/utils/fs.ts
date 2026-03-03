@@ -57,7 +57,7 @@ export async function copyLogoToTarget(logoName: string): Promise<void> {
   try {
     await copy(sourcePath, destPath, { overwrite: false })
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+    if ("ENOENT" === (error as NodeJS.ErrnoException).code) {
       throw new Error(`Logo "${logoName}.svg" not found in library`)
     }
     throw error
@@ -104,7 +104,9 @@ export function filterByVariants(
 ): string[] {
   const { dark, light, wordmark } = options
 
-  if (!dark && !light && !wordmark) return logoNames
+  if (!dark && !light && !wordmark) {
+    return logoNames
+  }
 
   const variants = ["_dark", "_light", "_wordmark"]
   const requestedVariants = [
@@ -125,7 +127,9 @@ export function filterByVariants(
     const hasVariantSuffix = variants.some((variant) =>
       lowerName.includes(variant),
     )
-    if (hasVariantSuffix) return false
+    if (hasVariantSuffix) {
+      return false
+    }
 
     const hasVariants = logoNames.some((otherLogo) => {
       const otherLower = otherLogo.toLowerCase()
@@ -153,7 +157,7 @@ export async function processLogos(
     try {
       let logoVariants = findLogoVariants(logoName, availableLogos)
 
-      if (logoVariants.length === 0) {
+      if (0 === logoVariants.length) {
         if (await logoExistsInLibrary(logoName)) {
           logoVariants = [logoName]
         } else {
@@ -168,7 +172,7 @@ export async function processLogos(
 
       const filteredVariants = filterByVariants(logoVariants, options)
 
-      if (filteredVariants.length === 0) {
+      if (0 === filteredVariants.length) {
         results.push({
           error: `No variants found for "${logoName}" matching the specified flags`,
           logoName,
@@ -214,21 +218,38 @@ export function getVariantType(
   const lowerName = logoName.toLowerCase()
   const lowerBase = baseName.toLowerCase()
 
-  if (lowerName.includes("_dark")) return "dark"
-  if (lowerName.includes("_light")) return "light"
-  if (lowerName.includes("_wordmark")) return "wordmark"
-  if (lowerName === lowerBase) return "default"
+  if (lowerName.includes("_dark")) {
+    return "dark"
+  }
+  if (lowerName.includes("_light")) {
+    return "light"
+  }
+  if (lowerName.includes("_wordmark")) {
+    return "wordmark"
+  }
+  if (lowerName === lowerBase) {
+    return "default"
+  }
 
   // Check for other variant patterns
-  if (lowerName.includes("_icon")) return "icon"
-  if (lowerName.includes("_logo")) return "logo"
+  if (lowerName.includes("_icon")) {
+    return "icon"
+  }
+  if (lowerName.includes("_logo")) {
+    return "logo"
+  }
 
   return null
 }
 
 // components.json (shadcn) helpers
+interface ComponentsJsonAliases {
+  ui: string
+  [key: string]: unknown
+}
+
 interface ComponentsJsonResult {
-  aliases: { ui: string; [key: string]: unknown }
+  aliases: ComponentsJsonAliases
   filePath: string
 }
 
@@ -240,7 +261,7 @@ function findComponentsJson(): ComponentsJsonResult | null {
       try {
         const parsed = fs.readJSONSync(candidate)
         const uiAlias = parsed?.aliases?.ui
-        if (typeof uiAlias === "string" && uiAlias.trim().length > 0) {
+        if ("string" === typeof uiAlias && 0 < uiAlias.trim().length) {
           return { aliases: parsed.aliases, filePath: candidate }
         }
       } catch {
@@ -251,7 +272,9 @@ function findComponentsJson(): ComponentsJsonResult | null {
     }
 
     const parent = path.dirname(currentDir)
-    if (parent === currentDir) break
+    if (parent === currentDir) {
+      break
+    }
     currentDir = parent
   }
 
@@ -274,7 +297,9 @@ function resolveTsconfigAlias(
     }
   }
 
-  if (!tsconfigPath) return null
+  if (!tsconfigPath) {
+    return null
+  }
 
   try {
     const raw = fs.readFileSync(tsconfigPath, "utf-8")
@@ -283,18 +308,21 @@ function resolveTsconfigAlias(
       .replace(/\/\/.*$/gm, "")
       .replace(/\/\*[\s\S]*?\*\//g, "")
     const tsconfig = JSON.parse(stripped)
-    const paths: Record<string, string[]> | undefined =
+    const paths: { [key: string]: string[] } | undefined =
       tsconfig?.compilerOptions?.paths
     const baseUrl: string = tsconfig?.compilerOptions?.baseUrl ?? "."
 
     if (paths) {
       for (const [pattern, targets] of Object.entries(paths)) {
-        if (!pattern.endsWith("/*") || !targets || targets.length === 0)
+        if (!pattern.endsWith("/*") || !targets || 0 === targets.length) {
           continue
+        }
         const prefix = pattern.slice(0, -1) // e.g. "@/" from "@/*"
         if (alias.startsWith(prefix)) {
           const target = targets[0]
-          if (!target.endsWith("/*")) continue
+          if (!target.endsWith("/*")) {
+            continue
+          }
           const targetPrefix = target.slice(0, -1) // e.g. "./src/" from "./src/*"
           const remainder = alias.slice(prefix.length) // e.g. "components/ui" from "@/components/ui"
           return path.resolve(
@@ -320,18 +348,18 @@ function resolveTsconfigAlias(
 function getComponentsJsonOutputDir(): null | string {
   try {
     const result = findComponentsJson()
-    if (!result) return null
+    if (!result) {
+      return null
+    }
 
     const componentsJsonDir = path.dirname(result.filePath)
-    const resolved = resolveTsconfigAlias(
-      result.aliases.ui,
-      componentsJsonDir,
-    )
-    if (!resolved) return null
+    const resolved = resolveTsconfigAlias(result.aliases.ui, componentsJsonDir)
+    if (!resolved) {
+      return null
+    }
 
     return path.join(resolved, "logos")
   } catch {
     return null
   }
 }
-
