@@ -1,32 +1,32 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from "vitest"
 
-import Add from '../../src/commands/add.js'
-import {validateLogoNames} from '../../src/utils/validate.js'
+import Add from "../../src/commands/add.js"
+import { validateLogoNames } from "../../src/utils/validate.js"
 
-describe('Add command', () => {
-  describe('command validation', () => {
-    it('should have correct description', () => {
-      expect(Add.description).toBe('Add brand logos to your project')
+describe("Add command", () => {
+  describe("command validation", () => {
+    it("should have correct description", () => {
+      expect(Add.description).toBe("Add brand logos to your project")
     })
 
-    it('should have examples', () => {
+    it("should have examples", () => {
       expect(Add.examples).toBeDefined()
       expect(Add.examples.length).toBeGreaterThan(0)
-      expect(Add.examples).toContain('$ brandcn add vercel')
+      expect(Add.examples).toContain("$ brandcn add vercel")
     })
 
-    it('should have strict mode disabled', () => {
+    it("should have strict mode disabled", () => {
       expect(Add.strict).toBe(false)
     })
 
-    it('should have empty args object', () => {
+    it("should have empty args object", () => {
       expect(Add.args).toEqual({})
     })
   })
 
-  describe('logo name validation integration', () => {
-    it('should validate logo names correctly', () => {
-      const validNames = ['vercel', 'neon', 'figma']
+  describe("logo name validation integration", () => {
+    it("should validate logo names correctly", () => {
+      const validNames = ["vercel", "neon", "figma"]
       const result = validateLogoNames(validNames)
 
       expect(result.validNames).toEqual(validNames)
@@ -34,14 +34,14 @@ describe('Add command', () => {
       expect(result.hasErrors).toBe(false)
     })
 
-    it('should handle mixed valid and invalid names', () => {
-      const mixedNames = ['vercel', 'invalid@name', 'neon']
+    it("should handle mixed valid and invalid names", () => {
+      const mixedNames = ["vercel", "invalid@name", "neon"]
       const result = validateLogoNames(mixedNames)
 
-      expect(result.validNames).toEqual(['vercel', 'neon'])
+      expect(result.validNames).toEqual(["vercel", "neon"])
       expect(result.errors).toHaveLength(1)
       expect(result.hasErrors).toBe(true)
-      expect(result.errors[0]?.name).toBe('invalid@name')
+      expect(result.errors[0]?.name).toBe("invalid@name")
     })
   })
 })

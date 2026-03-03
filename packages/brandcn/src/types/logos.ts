@@ -1,4 +1,4 @@
-export type VariantType = 'dark' | 'light' | 'wordmark'
+export type VariantType = "dark" | "default" | "icon" | "light" | "logo" | "wordmark"
 
 export interface ProcessLogosOptions {
   dark?: boolean
@@ -13,5 +13,3 @@ export interface LogoOperationResult {
   skipped?: boolean
   success: boolean
 }
-
-

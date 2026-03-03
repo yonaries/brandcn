@@ -1,66 +1,35 @@
-import fs from 'fs-extra'
-const {access, copy, ensureDir, readdir} = fs
-import {constants} from 'node:fs'
-import path from 'node:path'
-import {fileURLToPath} from 'node:url'
+import fs from "fs-extra"
+const { access, copy, ensureDir, readdir } = fs
+import { constants } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
-import type {LogoOperationResult, ProcessLogosOptions} from '../types/logos.js'
-
-// Global variable to store custom target directory
-let customTargetDirectory: null | string = null
+import type {
+  LogoOperationResult,
+  ProcessLogosOptions,
+  VariantType,
+} from "../types/logos.js"
 
 export function getLibraryPath(): string {
   const currentDir = path.dirname(fileURLToPath(import.meta.url))
-  return path.resolve(currentDir, '../../library')
+  return path.resolve(currentDir, "../../library")
 }
 
 export function getTargetLogosPath(): string {
-  if (customTargetDirectory) {
-    return path.resolve(process.cwd(), customTargetDirectory)
+  // Try resolving from shadcn components.json
+  const fromComponentsJson = getComponentsJsonOutputDir()
+  if (fromComponentsJson) {
+    return fromComponentsJson
   }
 
-  // Try reading configured outputDir from package.json
-  const configured = getConfiguredOutputDir()
-  if (configured) {
-    return configured
-  }
-
-  // Check if src folder exists first
-  const defaultPath = getDefaultDirectoryPath()
-
-  return path.resolve(process.cwd(), defaultPath)
+  // Fall back to current working directory
+  return process.cwd()
 }
 
-export function setCustomTargetDirectory(directory: string): void {
-  const normalized = directory?.toString().trim() || 'components/logos'
-  customTargetDirectory = normalized
-  persistConfiguredOutputDir(normalized)
-}
-
-export function getDefaultDirectoryPath(): string {
-  // Check if src folder exists first
-  const srcPath = path.resolve(process.cwd(), 'src')
-  try {
-    if (fs.pathExistsSync(srcPath) && fs.statSync(srcPath).isDirectory()) {
-      return 'src/components/logos'
-    }
-  } catch {
-    // If we can't access src folder, fall back to default
-  }
-
-  return 'components/logos'
-}
-
-export async function targetDirectoryExists(): Promise<boolean> {
-  try {
-    await access(getTargetLogosPath(), constants.F_OK)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function logoExists(logoName: string, basePath: string): Promise<boolean> {
+async function logoExists(
+  logoName: string,
+  basePath: string,
+): Promise<boolean> {
   try {
     await access(path.join(basePath, `${logoName}.svg`), constants.F_OK)
     return true
@@ -82,31 +51,39 @@ export async function ensureTargetDirectory(): Promise<void> {
 }
 
 export async function copyLogoToTarget(logoName: string): Promise<void> {
-  if (!(await logoExistsInLibrary(logoName))) {
-    throw new Error(`Logo "${logoName}.svg" not found in library`)
-  }
-
-  await ensureTargetDirectory()
-
   const sourcePath = path.join(getLibraryPath(), `${logoName}.svg`)
   const destPath = path.join(getTargetLogosPath(), `${logoName}.svg`)
 
-  await copy(sourcePath, destPath, {overwrite: false})
+  try {
+    await copy(sourcePath, destPath, { overwrite: false })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(`Logo "${logoName}.svg" not found in library`)
+    }
+    throw error
+  }
 }
 
 export async function getAvailableLogos(): Promise<string[]> {
   try {
     const files = await readdir(getLibraryPath())
     return files
-      .filter((file) => file.endsWith('.svg'))
-      .map((file) => file.replace('.svg', ''))
+      .filter((file) => file.endsWith(".svg"))
+      .map((file) => path.parse(file).name)
       .sort()
   } catch (error) {
-    throw new Error(`Failed to read library directory: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    throw new Error(
+      `Failed to read library directory: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    )
   }
 }
 
-export function findLogoVariants(brandName: string, availableLogos: string[]): string[] {
+export function findLogoVariants(
+  brandName: string,
+  availableLogos: string[],
+): string[] {
   const normalizedBrand = brandName.toLowerCase()
 
   return availableLogos.filter((logo) => {
@@ -115,18 +92,26 @@ export function findLogoVariants(brandName: string, availableLogos: string[]): s
     return (
       logoLower === normalizedBrand ||
       logoLower.startsWith(`${normalizedBrand}_`) ||
-      (logoLower.startsWith(`${normalizedBrand}-`) && logoLower.slice(normalizedBrand.length + 1).includes('_'))
+      (logoLower.startsWith(`${normalizedBrand}-`) &&
+        logoLower.slice(normalizedBrand.length + 1).includes("_"))
     )
   })
 }
 
-export function filterByVariants(logoNames: string[], options: ProcessLogosOptions): string[] {
-  const {dark, light, wordmark} = options
+export function filterByVariants(
+  logoNames: string[],
+  options: ProcessLogosOptions,
+): string[] {
+  const { dark, light, wordmark } = options
 
   if (!dark && !light && !wordmark) return logoNames
 
-  const variants = ['_dark', '_light', '_wordmark']
-  const requestedVariants = [dark && '_dark', light && '_light', wordmark && '_wordmark'].filter(Boolean) as string[]
+  const variants = ["_dark", "_light", "_wordmark"]
+  const requestedVariants = [
+    dark && "_dark",
+    light && "_light",
+    wordmark && "_wordmark",
+  ].filter(Boolean) as string[]
 
   return logoNames.filter((logoName) => {
     const lowerName = logoName.toLowerCase()
@@ -137,7 +122,9 @@ export function filterByVariants(logoNames: string[], options: ProcessLogosOptio
     }
 
     // Include base logo only if it has no variant suffixes and no variants exist
-    const hasVariantSuffix = variants.some((variant) => lowerName.includes(variant))
+    const hasVariantSuffix = variants.some((variant) =>
+      lowerName.includes(variant),
+    )
     if (hasVariantSuffix) return false
 
     const hasVariants = logoNames.some((otherLogo) => {
@@ -145,7 +132,8 @@ export function filterByVariants(logoNames: string[], options: ProcessLogosOptio
       return (
         otherLower !== lowerName &&
         (otherLower.startsWith(`${lowerName}_`) ||
-          (lowerName.includes('-') && otherLower.startsWith(`${lowerName.split('_')[0]}_`)))
+          (lowerName.includes("-") &&
+            otherLower.startsWith(`${lowerName.split("_")[0]}_`)))
       )
     })
 
@@ -153,20 +141,19 @@ export function filterByVariants(logoNames: string[], options: ProcessLogosOptio
   })
 }
 
-
 export async function processLogos(
   logoNames: string[],
   options: ProcessLogosOptions = {},
 ): Promise<LogoOperationResult[]> {
   const results: LogoOperationResult[] = []
   const availableLogos = await getAvailableLogos()
+  await ensureTargetDirectory()
 
   for (const logoName of logoNames) {
     try {
       let logoVariants = findLogoVariants(logoName, availableLogos)
 
       if (logoVariants.length === 0) {
-        // eslint-disable-next-line no-await-in-loop
         if (await logoExistsInLibrary(logoName)) {
           logoVariants = [logoName]
         } else {
@@ -191,18 +178,16 @@ export async function processLogos(
       }
 
       for (const variant of filteredVariants) {
-        // eslint-disable-next-line no-await-in-loop
         if (await logoExistsInTarget(variant)) {
           results.push({
             logoName: variant,
-            reason: 'Logo already exists in logos directory',
+            reason: "Logo already exists in logos directory",
             skipped: true,
             success: true,
           })
           continue
         }
 
-        // eslint-disable-next-line no-await-in-loop
         await copyLogoToTarget(variant)
         results.push({
           logoName: variant,
@@ -211,7 +196,8 @@ export async function processLogos(
       }
     } catch (error) {
       results.push({
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
         logoName,
         success: false,
       })
@@ -221,28 +207,49 @@ export async function processLogos(
   return results
 }
 
-export function getVariantType(logoName: string, baseName: string): null | string {
+export function getVariantType(
+  logoName: string,
+  baseName: string,
+): VariantType | null {
   const lowerName = logoName.toLowerCase()
   const lowerBase = baseName.toLowerCase()
 
-  if (lowerName.includes('_dark')) return 'dark'
-  if (lowerName.includes('_light')) return 'light'
-  if (lowerName.includes('_wordmark')) return 'wordmark'
-  if (lowerName === lowerBase) return 'default'
+  if (lowerName.includes("_dark")) return "dark"
+  if (lowerName.includes("_light")) return "light"
+  if (lowerName.includes("_wordmark")) return "wordmark"
+  if (lowerName === lowerBase) return "default"
 
   // Check for other variant patterns
-  if (lowerName.includes('_icon')) return 'icon'
-  if (lowerName.includes('_logo')) return 'logo'
+  if (lowerName.includes("_icon")) return "icon"
+  if (lowerName.includes("_logo")) return "logo"
 
   return null
 }
 
-// Configuration helpers
-function findNearestPackageJson(startDir: string = process.cwd()): null | string {
-  let currentDir = startDir
+// components.json (shadcn) helpers
+interface ComponentsJsonResult {
+  aliases: { ui: string; [key: string]: unknown }
+  filePath: string
+}
+
+function findComponentsJson(): ComponentsJsonResult | null {
+  let currentDir = process.cwd()
   while (true) {
-    const candidate = path.join(currentDir, 'package.json')
-    if (fs.pathExistsSync(candidate)) return candidate
+    const candidate = path.join(currentDir, "components.json")
+    if (fs.pathExistsSync(candidate)) {
+      try {
+        const parsed = fs.readJSONSync(candidate)
+        const uiAlias = parsed?.aliases?.ui
+        if (typeof uiAlias === "string" && uiAlias.trim().length > 0) {
+          return { aliases: parsed.aliases, filePath: candidate }
+        }
+      } catch {
+        // Invalid JSON, skip
+      }
+
+      return null
+    }
+
     const parent = path.dirname(currentDir)
     if (parent === currentDir) break
     currentDir = parent
@@ -251,12 +258,57 @@ function findNearestPackageJson(startDir: string = process.cwd()): null | string
   return null
 }
 
-function readBrandcnOutputDirFrom(pkgPath: string): null | string {
+function resolveTsconfigAlias(
+  alias: string,
+  componentsJsonDir: string,
+): null | string {
+  // Try tsconfig.json, then jsconfig.json
+  const configNames = ["tsconfig.json", "jsconfig.json"]
+  let tsconfigPath: null | string = null
+
+  for (const name of configNames) {
+    const candidate = path.join(componentsJsonDir, name)
+    if (fs.pathExistsSync(candidate)) {
+      tsconfigPath = candidate
+      break
+    }
+  }
+
+  if (!tsconfigPath) return null
+
   try {
-    const pkg = fs.readJSONSync(pkgPath)
-    const output = pkg?.brandcn?.outputDir
-    if (typeof output === 'string' && output.trim().length > 0) {
-      return path.resolve(path.dirname(pkgPath), output.trim())
+    const raw = fs.readFileSync(tsconfigPath, "utf-8")
+    // Strip single-line and multi-line comments for JSON parsing
+    const stripped = raw
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+    const tsconfig = JSON.parse(stripped)
+    const paths: Record<string, string[]> | undefined =
+      tsconfig?.compilerOptions?.paths
+    const baseUrl: string = tsconfig?.compilerOptions?.baseUrl ?? "."
+
+    if (paths) {
+      for (const [pattern, targets] of Object.entries(paths)) {
+        if (!pattern.endsWith("/*") || !targets || targets.length === 0)
+          continue
+        const prefix = pattern.slice(0, -1) // e.g. "@/" from "@/*"
+        if (alias.startsWith(prefix)) {
+          const target = targets[0]
+          if (!target.endsWith("/*")) continue
+          const targetPrefix = target.slice(0, -1) // e.g. "./src/" from "./src/*"
+          const remainder = alias.slice(prefix.length) // e.g. "components/ui" from "@/components/ui"
+          return path.resolve(
+            componentsJsonDir,
+            baseUrl,
+            targetPrefix + remainder,
+          )
+        }
+      }
+    }
+
+    // Fallback: try stripping @/ and resolving relative to project root
+    if (alias.startsWith("@/")) {
+      return path.resolve(componentsJsonDir, baseUrl, alias.slice(2))
     }
 
     return null
@@ -265,73 +317,21 @@ function readBrandcnOutputDirFrom(pkgPath: string): null | string {
   }
 }
 
-function listWorkspacePackageJsonCandidates(): string[] {
-  const roots = ['apps', 'packages']
-  const results: string[] = []
-  for (const root of roots) {
-    const rootPath = path.resolve(process.cwd(), root)
-    if (!fs.pathExistsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) continue
-    const entries = fs.readdirSync(rootPath)
-    for (const entry of entries) {
-      const pkgJson = path.join(rootPath, entry, 'package.json')
-      if (fs.pathExistsSync(pkgJson)) results.push(pkgJson)
-    }
-  }
-  
-  return results
-}
-
-function getConfiguredOutputDir(): null | string {
+function getComponentsJsonOutputDir(): null | string {
   try {
-    const nearest = findNearestPackageJson()
-    const absFromNearest = nearest ? readBrandcnOutputDirFrom(nearest) : null
-    if (absFromNearest) return absFromNearest
+    const result = findComponentsJson()
+    if (!result) return null
 
-    const workspacePkgs = listWorkspacePackageJsonCandidates()
-    const absCandidates = workspacePkgs
-      .map((pkgPath) => readBrandcnOutputDirFrom(pkgPath))
-      .filter(Boolean) as string[]
-    if (absCandidates.length === 1) return absCandidates[0]
+    const componentsJsonDir = path.dirname(result.filePath)
+    const resolved = resolveTsconfigAlias(
+      result.aliases.ui,
+      componentsJsonDir,
+    )
+    if (!resolved) return null
 
-    return null
+    return path.join(resolved, "logos")
   } catch {
     return null
   }
 }
 
-interface PackageJsonLike {
-  [key: string]: unknown
-  brandcn?: {
-    [key: string]: unknown
-    outputDir?: string
-  }
-}
-
-function persistConfiguredOutputDir(directory: string): void {
-  try {
-    const normalized = directory?.toString().trim() || 'components/logos'
-    const absTarget = path.resolve(process.cwd(), normalized)
-    const nearestFromTarget = findNearestPackageJson(path.dirname(absTarget))
-    const nearestFromCwd = findNearestPackageJson()
-    const pkgPath = nearestFromTarget || nearestFromCwd
-    if (!pkgPath) return
-    let pkg: PackageJsonLike = {}
-    try {
-      pkg = fs.readJSONSync(pkgPath)
-    } catch {
-      pkg = {}
-    }
-
-    const nextPkg = {
-      ...pkg,
-      brandcn: {
-        ...pkg.brandcn,
-        outputDir: normalized,
-      },
-    }
-
-    fs.writeJSONSync(pkgPath, nextPkg, {spaces: 2})
-  } catch {
-    // Ignore persistence errors; CLI can still operate with in-memory value
-  }
-}

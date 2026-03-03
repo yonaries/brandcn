@@ -1,32 +1,36 @@
-import * as p from '@clack/prompts'
-import {Command, Flags} from '@oclif/core'
+import * as p from "@clack/prompts"
+import { Command, Flags } from "@oclif/core"
 
-import {getAvailableLogos, getVariantType} from '../utils/fs.js'
-import {displayError} from '../utils/log.js'
+import { getAvailableLogos, getVariantType } from "../utils/fs.js"
+import { displayError } from "../utils/log.js"
 
 export default class List extends Command {
-  static override args = {}
-  static override description = 'List all available brand logos'
-  static override examples = ['$ brandcn list', '$ brandcn list --search react', '$ brandcn list --variants']
-  static override flags = {
+  static args = {}
+  static description = "List all available brand logos"
+  static examples = [
+    "$ brandcn list",
+    "$ brandcn list --search react",
+    "$ brandcn list --variants",
+  ]
+  static flags = {
     search: Flags.string({
-      char: 's',
-      description: 'Search for logos containing the specified text',
+      char: "s",
+      description: "Search for logos containing the specified text",
     }),
     variants: Flags.boolean({
-      char: 'v',
-      description: 'Group logos by brand and show variants',
+      char: "v",
+      description: "Group logos by brand and show variants",
     }),
   }
 
   public async run(): Promise<void> {
-    const {flags} = await this.parse(List)
+    const { flags } = await this.parse(List)
 
     try {
       const availableLogos = await getAvailableLogos()
 
       if (availableLogos.length === 0) {
-        displayError('No logos found in library')
+        displayError("No logos found in library")
         this.exit(1)
       }
 
@@ -35,12 +39,16 @@ export default class List extends Command {
       // Apply search filter if provided
       if (flags.search) {
         const searchTerm = flags.search.toLowerCase()
-        filteredLogos = availableLogos.filter((logo) => logo.toLowerCase().includes(searchTerm))
+        filteredLogos = availableLogos.filter((logo) =>
+          logo.toLowerCase().includes(searchTerm),
+        )
 
         if (filteredLogos.length === 0) {
-          p.intro('🔍 brandcn search')
+          p.intro("🔍 brandcn search")
           p.log.warning(`No logos found matching "${flags.search}"`)
-          p.outro('Try a different search term or run `brandcn list` to see all available logos.')
+          p.outro(
+            "Try a different search term or run `brandcn list` to see all available logos.",
+          )
           this.exit(0)
         }
       }
@@ -51,7 +59,11 @@ export default class List extends Command {
         this.displayLogosSimple(filteredLogos, flags.search)
       }
     } catch (error) {
-      displayError(`Failed to load logos: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      displayError(
+        `Failed to load logos: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      )
       this.exit(1)
     }
   }
@@ -63,12 +75,12 @@ export default class List extends Command {
 
     p.intro(title)
 
-    // Group logos by brand (base name without variants)
+    // Group logos by brand (base name without variant suffix)
     const groups = new Map<string, string[]>()
 
     for (const logo of logos) {
-      // Extract base brand name (everything before first underscore)
-      const baseName = logo.split('_')[0].split('-')[0]
+      // Extract base brand name (everything before the variant suffix like _dark, _light, etc.)
+      const baseName = logo.split("_")[0]
 
       if (!groups.has(baseName)) {
         groups.set(baseName, [])
@@ -78,7 +90,9 @@ export default class List extends Command {
     }
 
     // Sort groups by base name
-    const sortedGroups = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+    const sortedGroups = [...groups.entries()].sort(([a], [b]) =>
+      a.localeCompare(b),
+    )
 
     for (const [baseName, variants] of sortedGroups) {
       if (variants.length === 1) {
@@ -89,13 +103,17 @@ export default class List extends Command {
         for (const variant of variants.sort()) {
           const variantType = getVariantType(variant, baseName)
 
-          console.log(`    ├─ ${variant}${variantType ? ` (${variantType})` : ''}`)
+          console.log(
+            `    ├─ ${variant}${variantType ? ` (${variantType})` : ""}`,
+          )
         }
       }
     }
 
-    console.log('') // Add spacing
-    p.outro('💡 Use `brandcn add <logo-name>` to add a logo or variant to your project')
+    console.log("") // Add spacing
+    p.outro(
+      "💡 Use `brandcn add <logo-name>` to add a logo or variant to your project",
+    )
   }
 
   private displayLogosSimple(logos: string[], searchTerm?: string): void {
@@ -121,11 +139,11 @@ export default class List extends Command {
       }
 
       if (rowLogos.length > 0) {
-        console.log(`  ${rowLogos.join('')}`)
+        console.log(`  ${rowLogos.join("")}`)
       }
     }
 
-    console.log('') // Add spacing
-    p.outro('💡 Use `brandcn add <logo-name>` to add a logo to your project')
+    console.log("") // Add spacing
+    p.outro("💡 Use `brandcn add <logo-name>` to add a logo to your project")
   }
 }

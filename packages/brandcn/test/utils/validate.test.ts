@@ -1,11 +1,17 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from "vitest"
 
-import {parseLogoName, validateLogoNames} from '../../src/utils/validate'
+import { parseLogoName, validateLogoNames } from "../../src/utils/validate"
 
-describe('validate utilities', () => {
-  describe('validateLogoNames', () => {
-    it('should accept valid logo names', () => {
-      const validNames = ['vercel', 'github', 'react-native', 'better-auth', 'angular-2']
+describe("validate utilities", () => {
+  describe("validateLogoNames", () => {
+    it("should accept valid logo names", () => {
+      const validNames = [
+        "vercel",
+        "github",
+        "react-native",
+        "better-auth",
+        "angular-2",
+      ]
 
       for (const name of validNames) {
         const result = parseLogoName(name)
@@ -16,8 +22,15 @@ describe('validate utilities', () => {
       }
     })
 
-    it('should reject invalid logo names', () => {
-      const invalidNames = ['', 'logo@name', 'logo.name', 'logo name', 'logo+name', 'logo#name']
+    it("should reject invalid logo names", () => {
+      const invalidNames = [
+        "",
+        "logo@name",
+        "logo.name",
+        "logo name",
+        "logo+name",
+        "logo#name",
+      ]
 
       for (const name of invalidNames) {
         const result = parseLogoName(name)
@@ -30,28 +43,30 @@ describe('validate utilities', () => {
     })
   })
 
-  describe('validateLogoNames', () => {
-    it('should return detailed validation results', () => {
-      const mixedNames = ['vercel', 'invalid@name', 'valid-name', '']
+  describe("validateLogoNames", () => {
+    it("should return detailed validation results", () => {
+      const mixedNames = ["vercel", "invalid@name", "valid-name", ""]
 
       const result = validateLogoNames(mixedNames)
 
-      expect(result.validNames).toEqual(['vercel', 'valid-name'])
+      expect(result.validNames).toEqual(["vercel", "valid-name"])
       expect(result.errors).toHaveLength(2)
       expect(result.hasErrors).toBe(true)
 
       // Check error details
-      const invalidNameError = result.errors.find((e) => e.name === 'invalid@name')
+      const invalidNameError = result.errors.find(
+        (e) => e.name === "invalid@name",
+      )
       expect(invalidNameError).toBeDefined()
-      expect(invalidNameError?.error).toContain('alphanumeric characters')
+      expect(invalidNameError?.error).toContain("alphanumeric characters")
 
-      const emptyNameError = result.errors.find((e) => e.name === '')
+      const emptyNameError = result.errors.find((e) => e.name === "")
       expect(emptyNameError).toBeDefined()
-      expect(emptyNameError?.error).toContain('cannot be empty')
+      expect(emptyNameError?.error).toContain("cannot be empty")
     })
 
-    it('should handle all valid names', () => {
-      const validNames = ['vercel', 'next-js', 'react']
+    it("should handle all valid names", () => {
+      const validNames = ["vercel", "next-js", "react"]
 
       const result = validateLogoNames(validNames)
 
@@ -60,8 +75,8 @@ describe('validate utilities', () => {
       expect(result.hasErrors).toBe(false)
     })
 
-    it('should handle all invalid names', () => {
-      const invalidNames = ['invalid@name', 'logo.name', '']
+    it("should handle all invalid names", () => {
+      const invalidNames = ["invalid@name", "logo.name", ""]
 
       const result = validateLogoNames(invalidNames)
 
