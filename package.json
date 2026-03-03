@@ -3,7 +3,8 @@
   "version": "0.1.9",
   "private": true,
   "description": "brandcn monorepo containing the CLI package and website",
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "bun@1.3.6",
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
@@ -23,6 +24,6 @@
   },
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=10.15.0"
+    "bun": ">=1.0.0"
   }
 }
